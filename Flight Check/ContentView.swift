@@ -7,8 +7,7 @@
 //
 
 import SwiftUI
-
-var activeAirport: Airport?
+import CoreData
 
 struct ContentView: View {
     
@@ -59,24 +58,28 @@ var body: some View {
 struct FirstPage: View {
     @Environment(\.managedObjectContext) var context
     @FetchRequest(
-        entity: Airport.entity(),
+       entity: Airport.entity(),
         sortDescriptors: [NSSortDescriptor(keyPath: \Airport.dateAdded, ascending: false)]
     ) var airports: FetchedResults<Airport>
-     
-
     
-    init(){
-        /*for currAirport in airports {
-            if (currAirport.active) {
-                activeAirport = currAirport
-                break
+    func getActive() -> String {
+        for curr in airports {
+            if (curr.active) {
+                return String(curr.code!)
             }
-        }*/
+        }
+        return "No Selected Airport Currently"
     }
+    
+    
+    init () {
+        
+    }
+    
     var body: some View {
         NavigationView{
             HStack{
-                Text(String(airports.count))
+                Text(getActive())
                 NavigationLink(destination: AirportEditor()) {
                     Text("Edit")
                 }
@@ -102,11 +105,11 @@ struct airportRow: View {
 struct AirportEditor: View {
     @Environment(\.managedObjectContext) var context
     @FetchRequest(
-        entity: Airport.entity(),
+       entity: Airport.entity(),
         sortDescriptors: [NSSortDescriptor(keyPath: \Airport.dateAdded, ascending: false)]
     ) var airports: FetchedResults<Airport>
-     
-        
+    @Environment(\.presentationMode) var presentationMode
+    
         var body: some View {
             VStack{
                 List {
@@ -119,7 +122,7 @@ struct AirportEditor: View {
 
                     }.onDelete(perform: removeAirport)
                 }
-                .navigationBarTitle("Saved Airports")
+                .navigationBarTitle("Select Airport")
                 .navigationBarItems(trailing:
                 NavigationLink(destination: AddAirport()) {
                     Image(systemName: "plus")
@@ -130,44 +133,65 @@ struct AirportEditor: View {
         func removeAirport(at offsets: IndexSet) {
             for index in offsets {
                 let airport = airports[index]
-                if (airport.active && index != 0) {
-                    airports[0].active = true
-                }
-                if (airport.active && index == 1) {
-                    airports[1].active = true
-                }
                 context.delete(airport)
                 try? context.save()
             }
         }
     func makeActive(_ airport: Airport){
-        
+        for curr in airports {
+            curr.active = false
+        }
+        airport.active = true
+        self.presentationMode.wrappedValue.dismiss()
     }
 }
 
 struct AddAirport: View {
-    
     @Environment(\.managedObjectContext) var context
-    @Environment(\.presentationMode) var presentationMode
     @FetchRequest(
-        entity: Airport.entity(),
+       entity: Airport.entity(),
         sortDescriptors: [NSSortDescriptor(keyPath: \Airport.dateAdded, ascending: false)]
     ) var airports: FetchedResults<Airport>
+    @Environment(\.presentationMode) var presentationMode
     
     @State private var airportCode: String = ""
+    @State private var showAlert = false
+    @State private var showingAlert = false
     
     @State var goBack = false
     
     var body: some View {
         NavigationView{
-            HStack{
-                TextField("Airport Code", text: $airportCode)
-                Button(action: {
-                    self.addAirport()
-                    self.presentationMode.wrappedValue.dismiss()
-                }){
-                    Text("Add Airport")
+            VStack{
+                HStack{
+                    TextField("Airport Code", text: $airportCode).disableAutocorrection(true)
+                    Button(action: {
+                        if (self.airportCode.count == 4) {
+                            var duplicate = false
+                            for curr in self.airports {
+                                if (curr.code == self.airportCode.uppercased()) {
+                                    duplicate = true
+                                }
+                            }
+                            if (duplicate) {
+                                self.showAlert = true
+                            } else {
+                                self.addAirport()
+                                self.presentationMode.wrappedValue.dismiss()
+                            }
+                        } else {
+                            self.showingAlert = true
+                            
+                        }
+                    }){
+                        Text("Add Airport")
+                    }.alert(isPresented: $showingAlert) {
+                        Alert(title: Text("Error Adding Airport"), message: Text("Please Enter A 4 Digit Airport Identifier"), dismissButton: .default(Text("Got it!")))
+                    }.alert(isPresented: $showAlert) {
+                        Alert(title: Text("Error Adding Airport"), message: Text("Airport Already Added"), dismissButton: .default(Text("Got it!")))
+                    }
                 }
+                Spacer().frame(height: 200)
             }
         }
     }
@@ -177,7 +201,7 @@ struct AddAirport: View {
         }
         let newAirport = Airport(context: context)
         newAirport.id = UUID()
-        newAirport.code = airportCode
+        newAirport.code = airportCode.uppercased()
         newAirport.dateAdded = Date()
         newAirport.active = true
         try? context.save()
@@ -289,19 +313,34 @@ class TAFHandler {
 }
 
 struct SecondPage: View {
+    @Environment(\.managedObjectContext) var context
+    @FetchRequest(
+       entity: Airport.entity(),
+        sortDescriptors: [NSSortDescriptor(keyPath: \Airport.dateAdded, ascending: false)]
+    ) var airports: FetchedResults<Airport>
+    
+    
     let METARData = METARHandler()
     let TAFData = TAFHandler()
     @State private var code: String = "NULL"
 
+    func getActive() -> String {
+        for curr in airports {
+            if (curr.active) {
+                return String(curr.code!)
+            }
+        }
+        return "No Selected Airport Currently"
+    }
+    
     var body: some View {
         VStack{
-            Text("Enter Airport Code - ")
-            TextField("", text: $code)
+            Text(getActive())
             
             Text("METARs - ")
-            Text(METARData.getSpecificMETAR(code: code)).frame(height: 100)
+            Text(METARData.getSpecificMETAR(code: getActive())).frame(height: 100)
             Text("TAFs - ")
-            Text(TAFData.getSpecificTAF(code: code)).frame(height: 200)
+            Text(TAFData.getSpecificTAF(code: getActive())).frame(height: 200)
             Spacer().frame(height: 200)
         }
     }
