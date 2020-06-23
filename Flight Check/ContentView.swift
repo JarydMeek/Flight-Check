@@ -88,39 +88,56 @@ struct FirstPage: View {
                 return String(curr.code!)
             }
         }
-        return "No Selected Airport Currently"
+        return "No Active Airport"
     }
     /* MAPKIT STUFF */
     
     struct MapView: UIViewRepresentable {
         var coordinates: CLLocationCoordinate2D
+        var span: MKCoordinateSpan
         
         func makeUIView(context: Context) -> MKMapView {
             MKMapView(frame: .zero)
         }
         
         func updateUIView(_ view: MKMapView, context: Context) {
-            let span = MKCoordinateSpan(latitudeDelta: 0.07, longitudeDelta: 0.1)
             let region = MKCoordinateRegion(center: coordinates, span: span)
             view.setRegion(region, animated:false)
+            view.isZoomEnabled = false
+            view.isScrollEnabled = false
+            view.isUserInteractionEnabled = false
         }
     }
     
     
     var body: some View {
         NavigationView{
-            VStack(){
-                MapView(coordinates: CLLocationCoordinate2D(latitude: getLat(), longitude: getLon()))
-                    .frame(minWidth: 0, maxWidth: .infinity, minHeight: 0, maxHeight: 250)
-                    .edgesIgnoringSafeArea(.all)
-                Text("Active Airport - ")
-                HStack{
-                    Text(getActive())
-                    NavigationLink(destination: AirportEditor()) {
-                        Text("Edit")
-                    }
+            ZStack(alignment: .bottom) {
+                if (getActive() != "No Active Airport") {
+                    MapView(coordinates: CLLocationCoordinate2D(latitude: getLat(), longitude: getLon()), span: MKCoordinateSpan(latitudeDelta: 0.05, longitudeDelta: 0.12))
+                        .frame(minWidth: 0, maxWidth: .infinity, minHeight: 0, maxHeight: .infinity)
+                        .edgesIgnoringSafeArea(.all)
+                } else {
+                    MapView(coordinates: CLLocationCoordinate2D(latitude: 34.8283, longitude: -95.5795), span: MKCoordinateSpan(latitudeDelta: 60, longitudeDelta: 65))
+                        .frame(minWidth: 0, maxWidth: .infinity, minHeight: 0, maxHeight: .infinity)
+                        .edgesIgnoringSafeArea(.all)
                 }
-                Spacer()
+
+                Text(getActive())
+                    .padding(5)
+                    .background(Color("darkLight").opacity(0.75))
+                    .foregroundColor(Color("lightDark"))
+                    .font(.largeTitle)
+                    .cornerRadius(10)
+                    .frame(height: 200)
+                    NavigationLink(destination: AirportEditor()) {
+                        Text("Change Active Airport")
+                    }
+                    .padding(10)
+                    .background(Color.accentColor)
+                    .foregroundColor(Color("darkLight"))
+                    .cornerRadius(10)
+                    .frame(height: 75)
             }.frame(maxHeight: .infinity)
         }.navigationViewStyle(StackNavigationViewStyle())
     }
