@@ -144,7 +144,7 @@ struct FirstPage: View {
 }
 
 struct airportRow: View {
-    var airport: Airport
+    @ObservedObject var airport: Airport
     var body: some View {
         HStack{
             if(airport.active) {
@@ -156,7 +156,6 @@ struct airportRow: View {
         }
     }
 }
-
 struct AirportEditor: View {
     @Environment(\.managedObjectContext) var context
     @FetchRequest(
@@ -201,6 +200,8 @@ struct AirportEditor: View {
     }
 }
 
+
+
 struct AddAirport: View {
     @Environment(\.managedObjectContext) var context
     @FetchRequest(
@@ -209,17 +210,32 @@ struct AddAirport: View {
     ) var airports: FetchedResults<Airport>
     @Environment(\.presentationMode) var presentationMode
     
+    enum activeAlert {
+        case duplicate, wrongLength, invalidCode
+    }
+    
+
+    
     @State private var airportCode: String = ""
     @State private var showAlert = false
-    @State private var showingAlert = false
+    @State private var selectAlert: activeAlert = .wrongLength
+    
+
     
     @State var goBack = false
     
     var body: some View {
         NavigationView{
             VStack{
-                HStack{
-                    TextField("Airport Code", text: $airportCode).disableAutocorrection(true)
+                    TextField("Enter Airport Code", text: $airportCode)
+                        .padding(5)
+                        .background(Color("lightDark").opacity(0.10))
+                        .foregroundColor(Color("lightDark"))
+                        .font(.largeTitle)
+                        .cornerRadius(10)
+                        .frame(width: 250)
+                        .multilineTextAlignment(.center)
+                        .disableAutocorrection(true)
                     Button(action: {
                         if (self.airportCode.count == 4) {
                             var duplicate = false
@@ -229,31 +245,52 @@ struct AddAirport: View {
                                 }
                             }
                             if (duplicate) {
+                                self.selectAlert = .duplicate
                                 self.showAlert = true
                             } else {
-                                self.addAirport()
-                                self.presentationMode.wrappedValue.dismiss()
+                                let resultOfAdd = self.addAirport()
+                                
+                                if (resultOfAdd) {
+                                    self.presentationMode.wrappedValue.dismiss()
+                                } else {
+                                    self.selectAlert = .invalidCode
+                                    self.showAlert = true
+                                }
+                                
+
                             }
                         } else {
-                            self.showingAlert = true
+                            self.selectAlert = .wrongLength
+                            self.showAlert = true
                             
                         }
                     }){
                         Text("Add Airport")
-                    }.alert(isPresented: $showingAlert) {
-                        Alert(title: Text("Error Adding Airport"), message: Text("Please Enter A 4 Digit Airport Identifier"), dismissButton: .default(Text("Got it!")))
                     }.alert(isPresented: $showAlert) {
-                        Alert(title: Text("Error Adding Airport"), message: Text("Airport Already Added"), dismissButton: .default(Text("Got it!")))
+                        switch selectAlert{
+                            case .wrongLength:
+                                return Alert(title: Text("Error Adding Airport"), message: Text("Please Enter A 4 Digit Airport Identifier"), dismissButton: .default(Text("Got it!")))
+                            case .duplicate:
+                                   return Alert(title: Text("Error Adding Airport"), message: Text("Airport Already Added"), dismissButton: .default(Text("Got it!")))
+                            case .invalidCode:
+                                   return Alert(title: Text("Error Adding Airport"), message: Text("Invalid Airport Code"), dismissButton: .default(Text("Got it!")))
+                        }
+                        
                     }
-                }
-                Spacer().frame(height: 200)
+                    .padding(10)
+                    .background(Color.accentColor)
+                    .foregroundColor(Color("darkLight"))
+                    .cornerRadius(10)
+                    .frame(height: 75)
+                Spacer()
             }
         }.navigationViewStyle(StackNavigationViewStyle())
+        .navigationBarTitle("Add A New Airport")
     }
-    func addAirport() {
+    func addAirport() -> Bool {
         let TAFData = TAFHandler()
-        for airport in airports {
-            airport.active = false
+        for curr in airports {
+            curr.active = false
         }
         let newAirport = Airport(context: context)
         newAirport.id = UUID()
@@ -262,7 +299,13 @@ struct AddAirport: View {
         newAirport.active = true
         newAirport.lat = TAFData.getLat(code: airportCode.uppercased())
         newAirport.lon = TAFData.getLon()
-        try? context.save()
+        if (newAirport.lat == 0.0 && newAirport.lon == 0.0) {
+            context.delete(newAirport)
+            return false
+        } else {
+            try? context.save()
+            return true
+        }
     }
 
 }
