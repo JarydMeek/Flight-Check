@@ -72,10 +72,6 @@ struct FirstPage: View {
     }
     
     
-    init () {
-        
-    }
-    
     var body: some View {
         NavigationView{
             HStack{
@@ -84,7 +80,7 @@ struct FirstPage: View {
                     Text("Edit")
                 }
             }
-        }
+        }.navigationViewStyle(StackNavigationViewStyle())
     }
 }
 
@@ -193,7 +189,7 @@ struct AddAirport: View {
                 }
                 Spacer().frame(height: 200)
             }
-        }
+        }.navigationViewStyle(StackNavigationViewStyle())
     }
     func addAirport() {
         for airport in airports {

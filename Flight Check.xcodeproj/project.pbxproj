@@ -37,11 +37,12 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		42CDEF1A24A1706D008010DD /* Flight Check.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = "Flight Check.entitlements"; sourceTree = "<group>"; };
 		42D582B8246617CC006E392B /* Flight Check.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Flight Check.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		42D582BB246617CC006E392B /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		42D582BD246617CC006E392B /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
 		42D582C0246617CC006E392B /* Flight_Check.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = Flight_Check.xcdatamodel; sourceTree = "<group>"; };
-		42D582C2246617CC006E392B /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
+		42D582C2246617CC006E392B /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; usesTabs = 0; };
 		42D582C4246617CD006E392B /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		42D582C7246617CD006E392B /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
 		42D582CA246617CD006E392B /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
@@ -103,6 +104,7 @@
 		42D582BA246617CC006E392B /* Flight Check */ = {
 			isa = PBXGroup;
 			children = (
+				42CDEF1A24A1706D008010DD /* Flight Check.entitlements */,
 				42D582BB246617CC006E392B /* AppDelegate.swift */,
 				42D582BD246617CC006E392B /* SceneDelegate.swift */,
 				42D582C2246617CC006E392B /* ContentView.swift */,
@@ -442,19 +444,22 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = "Flight Check/Flight Check.entitlements";
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_ASSET_PATHS = "\"Flight Check/Preview Content\"";
 				DEVELOPMENT_TEAM = 2X8S526W34;
 				ENABLE_PREVIEWS = YES;
 				INFOPLIST_FILE = "Flight Check/Info.plist";
+				IPHONEOS_DEPLOYMENT_TARGET = 14.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = "jaryd.Flight-Check";
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SUPPORTS_MACCATALYST = YES;
 				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
+				TARGETED_DEVICE_FAMILY = "1,2,6";
 			};
 			name = Debug;
 		};
@@ -462,19 +467,22 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = "Flight Check/Flight Check.entitlements";
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_ASSET_PATHS = "\"Flight Check/Preview Content\"";
 				DEVELOPMENT_TEAM = 2X8S526W34;
 				ENABLE_PREVIEWS = YES;
 				INFOPLIST_FILE = "Flight Check/Info.plist";
+				IPHONEOS_DEPLOYMENT_TARGET = 14.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = "jaryd.Flight-Check";
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SUPPORTS_MACCATALYST = YES;
 				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
+				TARGETED_DEVICE_FAMILY = "1,2,6";
 			};
 			name = Release;
 		};
