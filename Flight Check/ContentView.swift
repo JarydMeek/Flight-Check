@@ -8,6 +8,7 @@
 
 import SwiftUI
 import CoreData
+import MapKit
 
 struct ContentView: View {
     
@@ -49,6 +50,7 @@ var body: some View {
     }
 }
 
+
 /* BEGINNING OF FIRST PAGE*/
 
 /* AIRPORT MANAGER */
@@ -62,6 +64,25 @@ struct FirstPage: View {
         sortDescriptors: [NSSortDescriptor(keyPath: \Airport.dateAdded, ascending: false)]
     ) var airports: FetchedResults<Airport>
     
+    
+    func getLat() -> Double {
+        for curr in airports {
+            if (curr.active) {
+                return curr.lat
+            }
+        }
+        return 0.0
+    }
+    
+    func getLon() -> Double {
+        for curr in airports {
+            if (curr.active) {
+                return curr.lon
+            }
+        }
+        return 0.0
+    }
+    
     func getActive() -> String {
         for curr in airports {
             if (curr.active) {
@@ -71,14 +92,20 @@ struct FirstPage: View {
         return "No Selected Airport Currently"
     }
     
-    
     var body: some View {
         NavigationView{
-            HStack{
-                Text(getActive())
-                NavigationLink(destination: AirportEditor()) {
-                    Text("Edit")
+            VStack{
+                Text("Active Airport - ")
+                HStack{
+                    Text(getActive())
+                    NavigationLink(destination: AirportEditor()) {
+                        Text("Edit")
+                    }
                 }
+                Text("Lattitude - ")
+                Text(String(getLat()))
+                Text("Longitude - ")
+                Text(String(getLon()))
             }
         }.navigationViewStyle(StackNavigationViewStyle())
     }
@@ -192,6 +219,7 @@ struct AddAirport: View {
         }.navigationViewStyle(StackNavigationViewStyle())
     }
     func addAirport() {
+        let TAFData = TAFHandler()
         for airport in airports {
             airport.active = false
         }
@@ -200,6 +228,8 @@ struct AddAirport: View {
         newAirport.code = airportCode.uppercased()
         newAirport.dateAdded = Date()
         newAirport.active = true
+        newAirport.lat = TAFData.getLat(code: airportCode.uppercased())
+        newAirport.lon = TAFData.getLon()
         try? context.save()
     }
 
@@ -291,25 +321,48 @@ class TAFHandler {
         }
     }
     
-    var lat = 0.0
-    var long = 0.0
+    var lat:Double = 0.0
+    var lon:Double = 0.0
     
     func getSpecificTAF(code: String) -> String {
         var counter = 0
         for currentTAF in allTAFs {
             counter = counter + 1
-            let array = currentTAF.split(separator: ",", maxSplits: 9, omittingEmptySubsequences: true)
+            let array = currentTAF.split(separator: ",", maxSplits: 2, omittingEmptySubsequences: true)
             if counter > 5 {
                 let checkCode = array[1]
                 if (code == checkCode) {
-                    print(array[7])
-                    print(array[8])
                     return String(array[0])
                 }
             }
         }
         return "LOLNOPE"
     }
+    
+    func getLatLon(code: String) -> Double {
+        var counter = 0
+        for currentTAF in allTAFs {
+            counter = counter + 1
+            let array = currentTAF.split(separator: ",", maxSplits: 9, omittingEmptySubsequences: false)
+            if counter > 5 {
+                let checkCode = array[1]
+                if (code == checkCode) {
+                    lon = Double(array[8]) ?? 0.0
+                    return Double(array[7]) ?? 0.0
+                }
+            }
+        }
+        return 0.0
+    }
+    
+    func getLat(code: String) -> Double {
+        return getLatLon(code: code)
+    }
+    
+    func getLon() -> Double {
+        return lon
+    }
+    
 }
 
 struct SecondPage: View {
@@ -336,7 +389,6 @@ struct SecondPage: View {
     var body: some View {
         VStack{
             Text(getActive())
-            
             Text("METARs - ")
             Text(METARData.getSpecificMETAR(code: getActive())).frame(height: 100)
             Text("TAFs - ")
