@@ -64,7 +64,6 @@ struct FirstPage: View {
         sortDescriptors: [NSSortDescriptor(keyPath: \Airport.dateAdded, ascending: false)]
     ) var airports: FetchedResults<Airport>
     
-    
     func getLat() -> Double {
         for curr in airports {
             if (curr.active) {
@@ -91,10 +90,29 @@ struct FirstPage: View {
         }
         return "No Selected Airport Currently"
     }
+    /* MAPKIT STUFF */
+    
+    struct MapView: UIViewRepresentable {
+        var coordinates: CLLocationCoordinate2D
+        
+        func makeUIView(context: Context) -> MKMapView {
+            MKMapView(frame: .zero)
+        }
+        
+        func updateUIView(_ view: MKMapView, context: Context) {
+            let span = MKCoordinateSpan(latitudeDelta: 0.07, longitudeDelta: 0.1)
+            let region = MKCoordinateRegion(center: coordinates, span: span)
+            view.setRegion(region, animated:false)
+        }
+    }
+    
     
     var body: some View {
         NavigationView{
-            VStack{
+            VStack(){
+                MapView(coordinates: CLLocationCoordinate2D(latitude: getLat(), longitude: getLon()))
+                    .frame(minWidth: 0, maxWidth: .infinity, minHeight: 0, maxHeight: 250)
+                    .edgesIgnoringSafeArea(.all)
                 Text("Active Airport - ")
                 HStack{
                     Text(getActive())
@@ -102,11 +120,8 @@ struct FirstPage: View {
                         Text("Edit")
                     }
                 }
-                Text("Lattitude - ")
-                Text(String(getLat()))
-                Text("Longitude - ")
-                Text(String(getLon()))
-            }
+                Spacer()
+            }.frame(maxHeight: .infinity)
         }.navigationViewStyle(StackNavigationViewStyle())
     }
 }
