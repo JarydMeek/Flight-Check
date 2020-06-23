@@ -193,7 +193,7 @@ struct AddAirport: View {
     }
     func addAirport() {
         for airport in airports {
-            airport.active = false;
+            airport.active = false
         }
         let newAirport = Airport(context: context)
         newAirport.id = UUID()
@@ -242,7 +242,7 @@ class METARHandler {
             return "ERROR"
         }
     }
-    
+
     func getSpecificMETAR(code: String) -> String {
         var counter = 0
         for currentMETAR in allMETARs {
@@ -291,15 +291,19 @@ class TAFHandler {
         }
     }
     
+    var lat = 0.0
+    var long = 0.0
     
     func getSpecificTAF(code: String) -> String {
         var counter = 0
         for currentTAF in allTAFs {
             counter = counter + 1
-            let array = currentTAF.split(separator: ",", maxSplits: 2, omittingEmptySubsequences: true)
+            let array = currentTAF.split(separator: ",", maxSplits: 9, omittingEmptySubsequences: true)
             if counter > 5 {
                 let checkCode = array[1]
                 if (code == checkCode) {
+                    print(array[7])
+                    print(array[8])
                     return String(array[0])
                 }
             }
