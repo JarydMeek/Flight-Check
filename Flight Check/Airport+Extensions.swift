@@ -7,7 +7,3 @@
 //
 
 import Foundation
-
-extension Airport: Identifiable {
-    
-}

@@ -50,6 +50,139 @@ var body: some View {
     }
 }
 
+/* HANDLERS */
+
+/* METARS AND TAFS */
+
+class METARHandler {
+    @State var getDataSuccesfully = false
+    var allMETARs:[String] = []
+    
+    init(){
+        allMETARs = getAllMETARs()
+    }
+    
+    func getAllMETARs() -> [String] {
+        let rawData = downloadData()
+        var lines:[String] = []
+        rawData.enumerateLines { (line, _) -> () in
+            lines.append(line)
+        }
+        return lines
+    }
+    
+    func downloadData() -> String {
+        if let url = URL(string: "https://www.aviationweather.gov/adds/dataserver_current/current/metars.cache.csv") {
+            do {
+                let contents = try String(contentsOf: url)
+                getDataSuccesfully = true
+                return contents
+            } catch {
+                return "ERROR"
+            }
+        } else {
+            return "ERROR"
+        }
+    }
+
+    func getSpecificMETAR(code: String) -> String {
+        var counter = 0
+        for currentMETAR in allMETARs {
+            counter = counter + 1
+            let array = currentMETAR.split(separator: ",", maxSplits: 2, omittingEmptySubsequences: true)
+            if counter > 5 {
+                let checkCode = array[1]
+                if (code == checkCode) {
+                    return String(array[0])
+                }
+            }
+        }
+        return "No Data Loaded"
+    }
+
+    func refresh() {
+        allMETARs = getAllMETARs()
+    }
+}
+
+class TAFHandler {
+    @State var getDataSuccesfully = false
+    var allTAFs:[String] = []
+    
+    init(){
+        allTAFs = getAllTAFs()
+    }
+    
+    func getAllTAFs() -> [String] {
+        let rawData = downloadData()
+        var lines:[String] = []
+        rawData.enumerateLines { (line, _) -> () in
+            lines.append(line)
+        }
+        return lines
+    }
+    
+    func downloadData() -> String {
+        if let url = URL(string: "https://www.aviationweather.gov/adds/dataserver_current/current/tafs.cache.csv") {
+            do {
+                let contents = try String(contentsOf: url)
+                getDataSuccesfully = true
+                return contents
+            } catch {
+                return "ERROR"
+            }
+        } else {
+            return "ERROR"
+        }
+    }
+    
+    var lat:Double = 0.0
+    var lon:Double = 0.0
+    
+    func getSpecificTAF(code: String) -> String {
+        var counter = 0
+        for currentTAF in allTAFs {
+            counter = counter + 1
+            let array = currentTAF.split(separator: ",", maxSplits: 2, omittingEmptySubsequences: true)
+            if counter > 5 {
+                let checkCode = array[1]
+                if (code == checkCode) {
+                    return String(array[0])
+                }
+            }
+        }
+        return "No Data Loaded"
+    }
+    
+    func getLatLon(code: String) -> Double {
+        var counter = 0
+        for currentTAF in allTAFs {
+            counter = counter + 1
+            let array = currentTAF.split(separator: ",", maxSplits: 9, omittingEmptySubsequences: false)
+            if counter > 5 {
+                let checkCode = array[1]
+                if (code == checkCode) {
+                    lon = Double(array[8]) ?? 0.0
+                    return Double(array[7]) ?? 0.0
+                }
+            }
+        }
+        return 0.0
+    }
+    
+    func getLat(code: String) -> Double {
+        return getLatLon(code: code)
+    }
+    
+    func getLon() -> Double {
+        return lon
+    }
+    
+    func refresh() {
+        allTAFs = getAllTAFs()
+    }
+    
+}
 
 /* BEGINNING OF FIRST PAGE*/
 
@@ -305,6 +438,7 @@ struct AddAirport: View {
         } else {
             try? context.save()
             return true
+            
         }
     }
 
@@ -314,131 +448,6 @@ struct AddAirport: View {
 /* BEGINNING OF SECOND PAGE*/
 
 /* WEATHER */
-
-/* METARS AND TAFS */
-
-class METARHandler {
-    @State var getDataSuccesfully = false
-    var allMETARs:[String] = []
-    
-    init(){
-        allMETARs = getAllMETARs()
-    }
-    
-    func getAllMETARs() -> [String] {
-        let rawData = downloadData()
-        var lines:[String] = []
-        rawData.enumerateLines { (line, _) -> () in
-            lines.append(line)
-        }
-        return lines
-    }
-    
-    func downloadData() -> String {
-        if let url = URL(string: "https://www.aviationweather.gov/adds/dataserver_current/current/metars.cache.csv") {
-            do {
-                let contents = try String(contentsOf: url)
-                getDataSuccesfully = true
-                return contents
-            } catch {
-                return "ERROR"
-            }
-        } else {
-            return "ERROR"
-        }
-    }
-
-    func getSpecificMETAR(code: String) -> String {
-        var counter = 0
-        for currentMETAR in allMETARs {
-            counter = counter + 1
-            let array = currentMETAR.split(separator: ",", maxSplits: 2, omittingEmptySubsequences: true)
-            if counter > 5 {
-                let checkCode = array[1]
-                if (code == checkCode) {
-                    return String(array[0])
-                }
-            }
-        }
-        return "LOLNOPE"
-    }
-
-}
-
-class TAFHandler {
-    @State var getDataSuccesfully = false
-    var allTAFs:[String] = []
-    
-    init(){
-        allTAFs = getAllTAFs()
-    }
-    
-    func getAllTAFs() -> [String] {
-        let rawData = downloadData()
-        var lines:[String] = []
-        rawData.enumerateLines { (line, _) -> () in
-            lines.append(line)
-        }
-        return lines
-    }
-    
-    func downloadData() -> String {
-        if let url = URL(string: "https://www.aviationweather.gov/adds/dataserver_current/current/tafs.cache.csv") {
-            do {
-                let contents = try String(contentsOf: url)
-                getDataSuccesfully = true
-                return contents
-            } catch {
-                return "ERROR"
-            }
-        } else {
-            return "ERROR"
-        }
-    }
-    
-    var lat:Double = 0.0
-    var lon:Double = 0.0
-    
-    func getSpecificTAF(code: String) -> String {
-        var counter = 0
-        for currentTAF in allTAFs {
-            counter = counter + 1
-            let array = currentTAF.split(separator: ",", maxSplits: 2, omittingEmptySubsequences: true)
-            if counter > 5 {
-                let checkCode = array[1]
-                if (code == checkCode) {
-                    return String(array[0])
-                }
-            }
-        }
-        return "LOLNOPE"
-    }
-    
-    func getLatLon(code: String) -> Double {
-        var counter = 0
-        for currentTAF in allTAFs {
-            counter = counter + 1
-            let array = currentTAF.split(separator: ",", maxSplits: 9, omittingEmptySubsequences: false)
-            if counter > 5 {
-                let checkCode = array[1]
-                if (code == checkCode) {
-                    lon = Double(array[8]) ?? 0.0
-                    return Double(array[7]) ?? 0.0
-                }
-            }
-        }
-        return 0.0
-    }
-    
-    func getLat(code: String) -> Double {
-        return getLatLon(code: code)
-    }
-    
-    func getLon() -> Double {
-        return lon
-    }
-    
-}
 
 struct SecondPage: View {
     @Environment(\.managedObjectContext) var context
@@ -450,8 +459,9 @@ struct SecondPage: View {
     
     let METARData = METARHandler()
     let TAFData = TAFHandler()
-    @State private var code: String = "NULL"
-
+    @State var currentMETAR: String = "Loading..."
+    @State var currentTAF: String = "Loading..."
+    
     func getActive() -> String {
         for curr in airports {
             if (curr.active) {
@@ -460,15 +470,72 @@ struct SecondPage: View {
         }
         return "No Selected Airport Currently"
     }
+
+    func loadData() {
+        METARData.refresh()
+        currentMETAR = METARData.getSpecificMETAR(code: getActive())
+        TAFData.refresh()
+        currentTAF = TAFData.getSpecificTAF(code: getActive())
+    }
+
+    func getCurrentMETAR() -> String {
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.25) {
+            currentMETAR = METARData.getSpecificMETAR(code: getActive())
+        }
+        return currentMETAR
+    }
+    func getCurrentTAF() -> String {
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.25) {
+        currentTAF = TAFData.getSpecificTAF(code: getActive())
+        }
+        return currentTAF
+    }
     
     var body: some View {
         VStack{
-            Text(getActive())
+            HStack{
+                HStack{
+                    Text(getActive())
+                    if (getActive().count == 4) {
+                        Text("Current Weather")
+                    }
+
+                }
+                .padding(10)
+                .background(Color.accentColor)
+                .foregroundColor(Color("darkLight"))
+                .cornerRadius(10)
+                .frame(height: 75)
+                
+                Button(action: {
+                    loadData()
+                }, label: {
+                    Image(systemName: "arrow.clockwise")
+                        .padding(10)
+                        .background(Color.accentColor)
+                        .foregroundColor(Color("darkLight"))
+                        .cornerRadius(10)
+                        .frame(height: 75)
+                })
+            }
+
             Text("METARs - ")
-            Text(METARData.getSpecificMETAR(code: getActive())).frame(height: 100)
+                .padding(10)
+                .background(Color.accentColor)
+                .foregroundColor(Color("darkLight"))
+                .cornerRadius(10)
+                .frame(height: 75)
+            Text(getCurrentMETAR()).frame(height: 200)
             Text("TAFs - ")
-            Text(TAFData.getSpecificTAF(code: getActive())).frame(height: 200)
-            Spacer().frame(height: 200)
+                .padding(10)
+                .background(Color.accentColor)
+                .foregroundColor(Color("darkLight"))
+                .cornerRadius(10)
+                .frame(height: 75)
+            Text(getCurrentTAF()).frame(height: 200)
+
+        }.onAppear {
+            loadData()
         }
     }
 }
