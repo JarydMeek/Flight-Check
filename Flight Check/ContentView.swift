@@ -364,7 +364,7 @@ struct AddAirport: View {
                         .padding(5)
                         .background(Color("lightDark").opacity(0.10))
                         .foregroundColor(Color("lightDark"))
-                        .font(.largeTitle)
+                        .font(.title)
                         .cornerRadius(10)
                         .frame(width: 250)
                         .multilineTextAlignment(.center)
@@ -505,7 +505,8 @@ struct SecondPage: View {
                 .background(Color.accentColor)
                 .foregroundColor(Color("darkLight"))
                 .cornerRadius(10)
-                .frame(height: 75)
+                .frame(height: 50)
+                
                 
                 Button(action: {
                     loadData()
@@ -515,7 +516,7 @@ struct SecondPage: View {
                         .background(Color.accentColor)
                         .foregroundColor(Color("darkLight"))
                         .cornerRadius(10)
-                        .frame(height: 75)
+                        .frame(height: 50)
                 })
             }
 
@@ -524,21 +525,22 @@ struct SecondPage: View {
                 .background(Color.accentColor)
                 .foregroundColor(Color("darkLight"))
                 .cornerRadius(10)
-                .frame(height: 75)
-            Text(getCurrentMETAR()).frame(height: 200)
+                .frame(height: 35)
+            Text(getCurrentMETAR()).frame(height: 150)
             Text("TAFs - ")
                 .padding(10)
                 .background(Color.accentColor)
                 .foregroundColor(Color("darkLight"))
                 .cornerRadius(10)
-                .frame(height: 75)
+                .frame(height: 35)
             Text(getCurrentTAF()).frame(height: 200)
-
+            Spacer()
         }.onAppear {
             loadData()
         }
     }
 }
+    
 
 /* BEGINNING OF THIRD PAGE*/
     
@@ -560,10 +562,64 @@ struct ThirdPage: View {
 
 /*  */
 
+
 struct FourthPage: View {
+    @Environment(\.managedObjectContext) var context
+    @FetchRequest(
+       entity: Airport.entity(),
+        sortDescriptors: [NSSortDescriptor(keyPath: \Airport.dateAdded, ascending: false)]
+    ) var airports: FetchedResults<Airport>
+
+
+
+    func getActive() -> String {
+        for curr in airports {
+            if (curr.active) {
+                return String(curr.code!)
+            }
+        }
+        return "No Selected Airport Currently"
+    }
+    
+    struct airportTranslator {
+        let code: String?
+        let name: String?
+    }
+    
+    var knownAirports = [airportTranslator]()
+    
+    func csvToString(fileName:String, fileType: String)-> String!{
+            guard let filepath = Bundle.main.path(forResource: fileName, ofType: fileType)
+                else {
+                    return nil
+            }
+            do {
+                return try String(contentsOfFile: filepath, encoding: .utf8)
+            } catch {
+                print("File Read Error for file \(filepath)")
+                return nil
+            }
+        }
+    
+    func cleanCSVToArray(data: String) -> [[String]] {
+            var result: [[String]] = []
+            let rows = data.components(separatedBy: "\n")
+            for row in rows {
+                let columns = row.components(separatedBy: ",")
+                result.append(columns)
+            }
+            return result
+        }
+    
+    func readCSV() -> [[String]] {
+        let data = csvToString(fileName: "icaoToNameAHAS", fileType: "csv")
+        return cleanCSVToArray(data: data!)
+    }
+    
+    
     var body: some View {
         VStack{
-            Text("Birds")
+            Text(readCSV()[0][1])
         }
     }
 }
