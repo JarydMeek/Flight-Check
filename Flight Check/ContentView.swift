@@ -685,7 +685,7 @@ struct FourthPage: View {
             }
             let data = Data(downloadData(inputURL: makeURL(icao: getActive())).utf8) // Get the NSData
             let xmlParser = XMLParser(data: data)
-            let delegate = MyDelegate() // This is your own delegate - see below
+            let delegate = MyDelegate()
             xmlParser.delegate = delegate
             if xmlParser.parse() {
                 return delegate.data
@@ -696,7 +696,6 @@ struct FourthPage: View {
     }
     
     class MyDelegate: NSObject, XMLParserDelegate {
-        // Simple state machine to capture fields and add completed Person to array
         var data: [birdData] = []
         enum State { case none, Route, Segment, Hour, DateTime, NEXRADRISK, SOARRISK, AHASRISK, BasedON, TIDepth }
         var state: State = .none
