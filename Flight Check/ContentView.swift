@@ -570,6 +570,7 @@ struct FourthPage: View {
         sortDescriptors: [NSSortDescriptor(keyPath: \Airport.dateAdded, ascending: false)]
     ) var airports: FetchedResults<Airport>
 
+    @State var validArea = Bool()
 
 
     func getActive() -> String {
@@ -596,7 +597,6 @@ struct FourthPage: View {
             do {
                 return try String(contentsOfFile: filepath, encoding: .utf8)
             } catch {
-                print("File Read Error for file \(filepath)")
                 return nil
             }
         }
@@ -625,27 +625,30 @@ struct FourthPage: View {
                 return current[1]
             }
         }
-        return "Not Found"
+        return "NULL"
     }
     
     func makeURL(icao: String) -> String {
         var url = "http://www.usahas.com/webservices/AHAS.asmx/GetAHASRisk12?Area=%27"
         let name = getName(icao: icao)
         
-        for char in name {
-            if char == " " {
-                url = url + "%20"
-            } else {
-                url = url + String(char)
+        if (name == "NULL") {
+            return "NULL"
+        } else {
+            for char in name {
+                if char == " " {
+                    url = url + "%20"
+                } else {
+                    url = url + String(char)
+                }
             }
+            url = url + "%27&iMonth=" + String(Calendar.current.dateComponents([.month], from: Date()).month!) + "&iDay=" + String(Calendar.current.dateComponents([.day], from: Date()).day!) + "&iHour=" +  String(Calendar.current.dateComponents([.hour], from: Date()).hour!)
+            return url
         }
-        //SHEPPARD%20AFB%20WICHITA%20FALLS%20MUNI%27&iMonth=8&iDay=20&iHour=6
-        url = url + "%27&iMonth=" + String(Calendar.current.dateComponents([.month], from: Date()).month!) + "&iDay=" + String(Calendar.current.dateComponents([.day], from: Date()).day!) + "&iHour=" +  String(Calendar.current.dateComponents([.hour], from: Date()).hour!)
-        print(url)
-        return url
     }
     
     struct birdData {
+        var id = UUID()
         var Route = ""
         var Segment = ""
         var Hour = ""
@@ -671,15 +674,25 @@ struct FourthPage: View {
     }
 
     func loadData() -> [birdData] {
-        let data = Data(downloadData(inputURL: makeURL(icao: getActive())).utf8) // Get the NSData
-        let xmlParser = XMLParser(data: data)
-        let delegate = MyDelegate() // This is your own delegate - see below
-        xmlParser.delegate = delegate
-        if xmlParser.parse() {
-            print("Result \(delegate.data)")
+        if makeURL(icao: getActive()) == "NULL" {
+            print(makeURL(icao: getActive()))
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.25) {
+                validArea = false
+            }
+        } else {
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.25) {
+                validArea = true
+            }
+            let data = Data(downloadData(inputURL: makeURL(icao: getActive())).utf8) // Get the NSData
+            let xmlParser = XMLParser(data: data)
+            let delegate = MyDelegate() // This is your own delegate - see below
+            xmlParser.delegate = delegate
+            if xmlParser.parse() {
+                return delegate.data
+            }
             return delegate.data
         }
-        return delegate.data
+        return []
     }
     
     class MyDelegate: NSObject, XMLParserDelegate {
@@ -692,6 +705,39 @@ struct FourthPage: View {
         func parser(_ parser: XMLParser, didStartElement elementName: String, namespaceURI: String?, qualifiedName qName: String?, attributes attributeDict: [String : String]) {
             switch elementName {
             case "Table" :
+                self.newData = birdData()
+                self.state = .none
+            case "Table1" :
+                self.newData = birdData()
+                self.state = .none
+            case "Table2" :
+                self.newData = birdData()
+                self.state = .none
+            case "Table3" :
+                self.newData = birdData()
+                self.state = .none
+            case "Table4" :
+                self.newData = birdData()
+                self.state = .none
+            case "Table5" :
+                self.newData = birdData()
+                self.state = .none
+            case "Table6" :
+                self.newData = birdData()
+                self.state = .none
+            case "Table7" :
+                self.newData = birdData()
+                self.state = .none
+            case "Table8" :
+                self.newData = birdData()
+                self.state = .none
+            case "Table9" :
+                self.newData = birdData()
+                self.state = .none
+            case "Table10" :
+                self.newData = birdData()
+                self.state = .none
+            case "Table11" :
                 self.newData = birdData()
                 self.state = .none
             case "Route":
@@ -718,6 +764,39 @@ struct FourthPage: View {
         }
         func parser(_ parser: XMLParser, didEndElement elementName: String, namespaceURI: String?, qualifiedName qName: String?) {
             if let newData = self.newData, elementName == "Table" {
+                self.data.append(newData)
+                self.newData = nil
+            } else if let newData = self.newData, elementName == "Table1" {
+                self.data.append(newData)
+                self.newData = nil
+            }else if let newData = self.newData, elementName == "Table2" {
+                self.data.append(newData)
+                self.newData = nil
+            }else if let newData = self.newData, elementName == "Table3" {
+                self.data.append(newData)
+                self.newData = nil
+            }else if let newData = self.newData, elementName == "Table4" {
+                self.data.append(newData)
+                self.newData = nil
+            }else if let newData = self.newData, elementName == "Table5" {
+                self.data.append(newData)
+                self.newData = nil
+            }else if let newData = self.newData, elementName == "Table6" {
+                self.data.append(newData)
+                self.newData = nil
+            }else if let newData = self.newData, elementName == "Table7" {
+                self.data.append(newData)
+                self.newData = nil
+            }else if let newData = self.newData, elementName == "Table8" {
+                self.data.append(newData)
+                self.newData = nil
+            }else if let newData = self.newData, elementName == "Table9" {
+                self.data.append(newData)
+                self.newData = nil
+            }else if let newData = self.newData, elementName == "Table10" {
+                self.data.append(newData)
+                self.newData = nil
+            }else if let newData = self.newData, elementName == "Table11" {
                 self.data.append(newData)
                 self.newData = nil
             }
@@ -753,72 +832,69 @@ struct FourthPage: View {
         func parser(_ parser: XMLParser, parseErrorOccurred parseError: Error) {
         }
     }
-    /*
-        class XMLHandler: NSObject, XMLParserDelegate{
-            var data: [birdData] = []
-            var elementName: String = String()
-            var Route = String()
-            var Segment = String()
-            var Hour = String()
-            var DateTime = String()
-            var NEXRADRISK = String()
-            var SOARRISK = String()
-            var AHASRISK = String()
-            var BasedON = String()
-            var TIDepth = Int()
-            
-            func parser(_ parser: XMLParser, didStartElement elementName: String, namespaceURI: String?, qualifiedName qName: String?, attributes attributeDict: [String : String] = [:]) {
 
-                if elementName == "title" {
-                    Route = String()
-                    Segment = String()
-                    Hour = String()
-                    DateTime = String()
-                    NEXRADRISK = String()
-                    SOARRISK = String()
-                    AHASRISK = String()
-                    BasedON = String()
-                    TIDepth = Int()
-                }
-
-                self.elementName = elementName
-            }
-            func parser(_ parser: XMLParser, didEndElement elementName: String, namespaceURI: String?, qualifiedName qName: String?) {
-                if elementName == "book" {
-                    let currentData = birdData(Route: Route, Segment: Segment, Hour: Hour, DateTime: DateTime,NEXRADRISK: NEXRADRISK, SOARRISK: SOARRISK, AHASRISK: AHASRISK, BasedON: BasedON, TIDepth: TIDepth)
-                    data.append(currentData)
-                }
-            }
-            func parser(_ parser: XMLParser, foundCharacters string: String) {
-                let data = string.trimmingCharacters(in: CharacterSet.whitespacesAndNewlines)
-
-                if (!data.isEmpty) {
-                    if self.elementName == "Route" {
-                        Route += data
-                    } else if self.elementName == "Segment" {
-                        Segment += data
-                    }else if self.elementName == "Hour" {
-                        Hour += data
-                    }else if self.elementName == "DateTime" {
-                        DateTime += data
-                    }else if self.elementName == "NEXRADRISK" {
-                        NEXRADRISK += data
-                    }else if self.elementName == "SOARRISK" {
-                        SOARRISK += data
-                    }else if self.elementName == "BasedON" {
-                        BasedON += data
-                    }else if self.elementName == "TIDepth" {
-                        TIDepth += Int(data)!
-                    }
-                }
-            }
-        }
-    */
+    func loadAllData() -> String {
+        _ = loadData()
+        return getActive()
+    }
     
     var body: some View {
-        VStack{
-            //Text(data.downloadData(input: makeURL(icao: getActive())))
-            Text(loadData()[0].Segment)
+        VStack {
+            Text(loadAllData())
+                .padding(10)
+                .background(Color.accentColor)
+                .foregroundColor(Color("darkLight"))
+                .cornerRadius(10)
+            if validArea {
+                ScrollView {
+                    VStack{
+                        ForEach (loadData(), id: \.self.id) { data in
+                            HStack{
+                                Spacer()
+                                VStack {
+                                    Text("Segment - " + data.Segment)
+                                    Text(data.DateTime)
+                                    HStack {
+                                        Text("NEXTRAD - " + data.NEXRADRISK)
+                                        Text("SOAR - " + data.SOARRISK)
+                                    }
+                                    Text("Risk Evalutation Based On - " + data.BasedON)
+                                    if data.TIDepth == String(99999) {
+                                        Text("Height - No Data")
+                                    } else {
+                                        Text("Height - " + data.TIDepth)
+                                    }
+                                }
+                                Spacer()
+                                if data.AHASRISK.uppercased() == "LOW" {
+                                    Text(data.AHASRISK.uppercased())
+                                        .padding()
+                                        .background(Color.green)
+                                        .foregroundColor(Color("darkLight"))
+                                } else if data.AHASRISK.uppercased() == "MODERATE" {
+                                    Text(data.AHASRISK.uppercased())
+                                        .padding()
+                                        .background(Color.yellow)
+                                        .foregroundColor(Color("darkLight"))
+                                }else if data.AHASRISK.uppercased() == "SEVERE" {
+                                    Text(data.AHASRISK.uppercased())
+                                        .padding()
+                                        .background(Color.red)
+                                        .foregroundColor(Color("darkLight"))
+                                }
+                                Spacer()
+                            }
+                            Divider()
+                        }
+                    }
+                }
+            }else {
+                VStack{
+                    Spacer()
+                    Text("Avian Hazard Data Could Not Be Loaded For The Selected Airport").multilineTextAlignment(.center)
+                    Spacer()
+                }
+            }
         }
     }
 }
