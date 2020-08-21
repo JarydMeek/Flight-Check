@@ -616,10 +616,209 @@ struct FourthPage: View {
         return cleanCSVToArray(data: data!)
     }
     
+    func getName(icao: String) -> String {
+        
+        let data = readCSV()
+        
+        for current in data {
+            if current[0] == icao {
+                return current[1]
+            }
+        }
+        return "Not Found"
+    }
+    
+    func makeURL(icao: String) -> String {
+        var url = "http://www.usahas.com/webservices/AHAS.asmx/GetAHASRisk12?Area=%27"
+        let name = getName(icao: icao)
+        
+        for char in name {
+            if char == " " {
+                url = url + "%20"
+            } else {
+                url = url + String(char)
+            }
+        }
+        //SHEPPARD%20AFB%20WICHITA%20FALLS%20MUNI%27&iMonth=8&iDay=20&iHour=6
+        url = url + "%27&iMonth=" + String(Calendar.current.dateComponents([.month], from: Date()).month!) + "&iDay=" + String(Calendar.current.dateComponents([.day], from: Date()).day!) + "&iHour=" +  String(Calendar.current.dateComponents([.hour], from: Date()).hour!)
+        print(url)
+        return url
+    }
+    
+    struct birdData {
+        var Route = ""
+        var Segment = ""
+        var Hour = ""
+        var DateTime = ""
+        var NEXRADRISK = ""
+        var SOARRISK = ""
+        var AHASRISK = ""
+        var BasedON = ""
+        var TIDepth = ""
+    }
+    
+    func downloadData(inputURL: String) -> String {
+        if let url = URL(string: inputURL) {
+            do {
+                let contents = try String(contentsOf: url)
+                return contents
+            } catch {
+                return "ERROR"
+            }
+        } else {
+            return "ERROR"
+        }
+    }
+
+    func loadData() -> [birdData] {
+        let data = Data(downloadData(inputURL: makeURL(icao: getActive())).utf8) // Get the NSData
+        let xmlParser = XMLParser(data: data)
+        let delegate = MyDelegate() // This is your own delegate - see below
+        xmlParser.delegate = delegate
+        if xmlParser.parse() {
+            print("Result \(delegate.data)")
+            return delegate.data
+        }
+        return delegate.data
+    }
+    
+    class MyDelegate: NSObject, XMLParserDelegate {
+        // Simple state machine to capture fields and add completed Person to array
+        var data: [birdData] = []
+        enum State { case none, Route, Segment, Hour, DateTime, NEXRADRISK, SOARRISK, AHASRISK, BasedON, TIDepth }
+        var state: State = .none
+        var newData: birdData? = nil
+
+        func parser(_ parser: XMLParser, didStartElement elementName: String, namespaceURI: String?, qualifiedName qName: String?, attributes attributeDict: [String : String]) {
+            switch elementName {
+            case "Table" :
+                self.newData = birdData()
+                self.state = .none
+            case "Route":
+                self.state = .Route
+            case "Segment":
+                self.state = .Segment
+            case "Hour":
+                self.state = .Hour
+            case "DateTime":
+                self.state = .DateTime
+            case "NEXRADRISK":
+                self.state = .NEXRADRISK
+            case "SOARRISK":
+                self.state = .SOARRISK
+            case "AHASRISK":
+                self.state = .AHASRISK
+            case "BasedON":
+                self.state = .BasedON
+            case "TIDepth":
+                self.state = .TIDepth
+            default:
+                self.state = .none
+            }
+        }
+        func parser(_ parser: XMLParser, didEndElement elementName: String, namespaceURI: String?, qualifiedName qName: String?) {
+            if let newData = self.newData, elementName == "Table" {
+                self.data.append(newData)
+                self.newData = nil
+            }
+            self.state = .none
+        }
+
+        func parser(_ parser: XMLParser, foundCharacters string: String) {
+            guard let _ = self.newData else { return }
+            switch self.state {
+            case .Route:
+                self.newData!.Route = string
+            case .Segment:
+                self.newData!.Segment = string
+            case .Hour:
+                self.newData!.Hour = string
+            case .DateTime:
+                self.newData!.DateTime = string
+            case .NEXRADRISK:
+                self.newData!.NEXRADRISK = string
+            case .SOARRISK:
+                self.newData!.SOARRISK = string
+            case .AHASRISK:
+                self.newData!.AHASRISK = string
+            case .BasedON:
+                self.newData!.BasedON = string
+            case .TIDepth:
+                self.newData!.TIDepth = string
+            default:
+                break
+            }
+        }
+
+        func parser(_ parser: XMLParser, parseErrorOccurred parseError: Error) {
+        }
+    }
+    /*
+        class XMLHandler: NSObject, XMLParserDelegate{
+            var data: [birdData] = []
+            var elementName: String = String()
+            var Route = String()
+            var Segment = String()
+            var Hour = String()
+            var DateTime = String()
+            var NEXRADRISK = String()
+            var SOARRISK = String()
+            var AHASRISK = String()
+            var BasedON = String()
+            var TIDepth = Int()
+            
+            func parser(_ parser: XMLParser, didStartElement elementName: String, namespaceURI: String?, qualifiedName qName: String?, attributes attributeDict: [String : String] = [:]) {
+
+                if elementName == "title" {
+                    Route = String()
+                    Segment = String()
+                    Hour = String()
+                    DateTime = String()
+                    NEXRADRISK = String()
+                    SOARRISK = String()
+                    AHASRISK = String()
+                    BasedON = String()
+                    TIDepth = Int()
+                }
+
+                self.elementName = elementName
+            }
+            func parser(_ parser: XMLParser, didEndElement elementName: String, namespaceURI: String?, qualifiedName qName: String?) {
+                if elementName == "book" {
+                    let currentData = birdData(Route: Route, Segment: Segment, Hour: Hour, DateTime: DateTime,NEXRADRISK: NEXRADRISK, SOARRISK: SOARRISK, AHASRISK: AHASRISK, BasedON: BasedON, TIDepth: TIDepth)
+                    data.append(currentData)
+                }
+            }
+            func parser(_ parser: XMLParser, foundCharacters string: String) {
+                let data = string.trimmingCharacters(in: CharacterSet.whitespacesAndNewlines)
+
+                if (!data.isEmpty) {
+                    if self.elementName == "Route" {
+                        Route += data
+                    } else if self.elementName == "Segment" {
+                        Segment += data
+                    }else if self.elementName == "Hour" {
+                        Hour += data
+                    }else if self.elementName == "DateTime" {
+                        DateTime += data
+                    }else if self.elementName == "NEXRADRISK" {
+                        NEXRADRISK += data
+                    }else if self.elementName == "SOARRISK" {
+                        SOARRISK += data
+                    }else if self.elementName == "BasedON" {
+                        BasedON += data
+                    }else if self.elementName == "TIDepth" {
+                        TIDepth += Int(data)!
+                    }
+                }
+            }
+        }
+    */
     
     var body: some View {
         VStack{
-            Text(readCSV()[0][1])
+            //Text(data.downloadData(input: makeURL(icao: getActive())))
+            Text(loadData()[0].Segment)
         }
     }
 }
