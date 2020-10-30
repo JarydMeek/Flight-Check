@@ -851,7 +851,8 @@ struct FourthPage: View {
                             HStack{
                                 Spacer()
                                 VStack {
-                                    Text("Segment - " + data.Segment)
+                                    Text("Segment - ")
+                                    Text(data.Segment).multilineTextAlignment(.center)
                                     Text(data.DateTime)
                                     HStack {
                                         Text("NEXTRAD - " + data.NEXRADRISK)
