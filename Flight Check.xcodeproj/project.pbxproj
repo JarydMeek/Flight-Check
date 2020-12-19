@@ -18,6 +18,10 @@
 		42D582D6246617CD006E392B /* Flight_CheckTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 42D582D5246617CD006E392B /* Flight_CheckTests.swift */; };
 		42D582E1246617CD006E392B /* Flight_CheckUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 42D582E0246617CD006E392B /* Flight_CheckUITests.swift */; };
 		42D582EF2466187A006E392B /* Airport+Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 42D582EE2466187A006E392B /* Airport+Extensions.swift */; };
+		7150B59A258E8615000EA9CC /* Airports.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7150B599258E8615000EA9CC /* Airports.swift */; };
+		7150B5A2258E8724000EA9CC /* Weather.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7150B5A1258E8724000EA9CC /* Weather.swift */; };
+		7150B5A7258E8809000EA9CC /* Notices.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7150B5A6258E8809000EA9CC /* Notices.swift */; };
+		7150B5AC258E8835000EA9CC /* Birds.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7150B5AB258E8835000EA9CC /* Birds.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -38,7 +42,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
-		426960D324EF7A64000AF4D1 /* icaoToNameAHAS.csv */ = {isa = PBXFileReference; lastKnownFileType = file; name = icaoToNameAHAS.csv; path = "Convert String to CSV for AHAS/icaoToNameAHAS.csv"; sourceTree = SOURCE_ROOT; };
+		426960D324EF7A64000AF4D1 /* icaoToNameAHAS.csv */ = {isa = PBXFileReference; lastKnownFileType = text; name = icaoToNameAHAS.csv; path = "Convert String to CSV for AHAS/icaoToNameAHAS.csv"; sourceTree = SOURCE_ROOT; };
 		42CDEF1A24A1706D008010DD /* Flight Check.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = "Flight Check.entitlements"; sourceTree = "<group>"; };
 		42D582B8246617CC006E392B /* Flight Check.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Flight Check.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		42D582BB246617CC006E392B /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
@@ -56,6 +60,10 @@
 		42D582E0246617CD006E392B /* Flight_CheckUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Flight_CheckUITests.swift; sourceTree = "<group>"; };
 		42D582E2246617CD006E392B /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		42D582EE2466187A006E392B /* Airport+Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Airport+Extensions.swift"; sourceTree = "<group>"; };
+		7150B599258E8615000EA9CC /* Airports.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Airports.swift; sourceTree = "<group>"; };
+		7150B5A1258E8724000EA9CC /* Weather.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Weather.swift; sourceTree = "<group>"; };
+		7150B5A6258E8809000EA9CC /* Notices.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Notices.swift; sourceTree = "<group>"; };
+		7150B5AB258E8835000EA9CC /* Birds.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Birds.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -106,10 +114,14 @@
 		42D582BA246617CC006E392B /* Flight Check */ = {
 			isa = PBXGroup;
 			children = (
+				7150B599258E8615000EA9CC /* Airports.swift */,
 				42CDEF1A24A1706D008010DD /* Flight Check.entitlements */,
 				42D582BB246617CC006E392B /* AppDelegate.swift */,
 				42D582BD246617CC006E392B /* SceneDelegate.swift */,
 				42D582C2246617CC006E392B /* ContentView.swift */,
+				7150B5AB258E8835000EA9CC /* Birds.swift */,
+				7150B5A6258E8809000EA9CC /* Notices.swift */,
+				7150B5A1258E8724000EA9CC /* Weather.swift */,
 				42D582C4246617CD006E392B /* Assets.xcassets */,
 				42D582C9246617CD006E392B /* LaunchScreen.storyboard */,
 				42D582CC246617CD006E392B /* Info.plist */,
@@ -284,6 +296,10 @@
 				42D582EF2466187A006E392B /* Airport+Extensions.swift in Sources */,
 				42D582C3246617CC006E392B /* ContentView.swift in Sources */,
 				42D582C1246617CC006E392B /* Flight_Check.xcdatamodeld in Sources */,
+				7150B5AC258E8835000EA9CC /* Birds.swift in Sources */,
+				7150B5A7258E8809000EA9CC /* Notices.swift in Sources */,
+				7150B59A258E8615000EA9CC /* Airports.swift in Sources */,
+				7150B5A2258E8724000EA9CC /* Weather.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
