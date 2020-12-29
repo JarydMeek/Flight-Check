@@ -35,14 +35,14 @@ var body: some View {
             Notices().tabItem {
                 VStack {
                     Image(systemName: "exclamationmark.circle")
-                    Text("Notices")
+                    Text("NOTAMs")
                 }
             }
                 .tag(2)
             Birds().tabItem {
                 VStack {
                     Image("chick")
-                    Text("Birds")
+                    Text("Birbs")
                 }
             }
                 .tag(3)
@@ -99,6 +99,34 @@ class METARHandler {
         }
         return "No Data Loaded"
     }
+    
+    var lat:Double = 0.0
+    var lon:Double = 0.0
+    
+    func getLatLon(code: String) -> Double {
+        var counter = 0
+        for currentTAF in allMETARs {
+            counter = counter + 1
+            let array = currentTAF.split(separator: ",", maxSplits: 9, omittingEmptySubsequences: false)
+            if counter > 5 {
+                let checkCode = array[1]
+                if (code == checkCode) {
+                    lon = Double(array[4]) ?? 0.0
+                    return Double(array[3]) ?? 0.0
+                }
+            }
+        }
+        return 0.0
+    }
+    
+    func getLat(code: String) -> Double {
+        return getLatLon(code: code)
+    }
+    
+    func getLon() -> Double {
+        return lon
+    }
+    
 
     func refresh() {
         allMETARs = getAllMETARs()

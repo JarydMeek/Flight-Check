@@ -297,11 +297,7 @@ struct Birds: View {
                                 Spacer()
                                 VStack {
                                     Text("Segment - " + data.Segment)
-                                    Text(data.DateTime)
-                                    HStack {
-                                        Text("NEXTRAD - " + data.NEXRADRISK)
-                                        Text("SOAR - " + data.SOARRISK)
-                                    }
+                                    Text(data.DateTime).bold()
                                     Text("Risk Evalutation Based On - " + data.BasedON)
                                     if data.TIDepth == String(99999) {
                                         Text("Height - No Data")

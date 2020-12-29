@@ -246,7 +246,7 @@ struct AddAirport: View {
         .navigationBarTitle("Add A New Airport")
     }
     func addAirport() -> Bool {
-        let TAFData = TAFHandler()
+        let METARData = METARHandler()
         for curr in airports {
             curr.active = false
         }
@@ -255,8 +255,8 @@ struct AddAirport: View {
         newAirport.code = airportCode.uppercased()
         newAirport.dateAdded = Date()
         newAirport.active = true
-        newAirport.lat = TAFData.getLat(code: airportCode.uppercased())
-        newAirport.lon = TAFData.getLon()
+        newAirport.lat = METARData.getLat(code: airportCode.uppercased())
+        newAirport.lon = METARData.getLon()
         if (newAirport.lat == 0.0 && newAirport.lon == 0.0) {
             context.delete(newAirport)
             return false
