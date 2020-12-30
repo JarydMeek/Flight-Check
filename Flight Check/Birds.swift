@@ -120,7 +120,6 @@ struct Birds: View {
 
     func loadData() -> [birdData] {
         if makeURL(icao: getActive()) == "NULL" {
-            print(makeURL(icao: getActive()))
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.25) {
                 validArea = false
             }
@@ -284,11 +283,24 @@ struct Birds: View {
     
     var body: some View {
         VStack {
-            Text(loadAllData())
-                .padding(10)
-                .background(Color.accentColor)
-                .foregroundColor(Color("darkLight"))
-                .cornerRadius(10)
+            HStack{
+                Text(loadAllData() + " Avian Risk")
+                    .padding(10)
+                    .background(Color.accentColor)
+                    .foregroundColor(Color("darkLight"))
+                    .cornerRadius(10)
+                    .font(.largeTitle)
+                Button(action: {
+                    _ = loadAllData()
+                }, label: {
+                    Image(systemName: "arrow.clockwise")
+                        .padding(10)
+                        .background(Color.accentColor)
+                        .foregroundColor(Color("darkLight"))
+                        .cornerRadius(10)
+                        .font(.largeTitle)
+                })
+            }
             if validArea {
                 ScrollView {
                     VStack{
@@ -296,33 +308,42 @@ struct Birds: View {
                             HStack{
                                 Spacer()
                                 VStack {
-                                    Text("Segment - " + data.Segment)
                                     Text(data.DateTime).bold()
-                                    Text("Risk Evalutation Based On - " + data.BasedON)
+                                        .font(.title2)
+                                    Text("Segment - ").bold()
+                                    Text(data.Segment)
+                                    Text("Risk Evalutation Based On - ").bold()
+                                    Text(data.BasedON)
+                                    HStack {
+                                        Text("Height - ").bold()
                                     if data.TIDepth == String(99999) {
-                                        Text("Height - No Data")
+                                        Text("No Data")
                                     } else {
-                                        Text("Height - " + data.TIDepth)
+                                        Text(data.TIDepth)
                                     }
-                                }
+                                    }
+                                }.multilineTextAlignment(.center)
                                 Spacer()
                                 if data.AHASRISK.uppercased() == "LOW" {
                                     Text(data.AHASRISK.uppercased())
                                         .padding()
                                         .background(Color.green)
                                         .foregroundColor(Color("darkLight"))
+                                        .frame(width: 125)
                                 } else if data.AHASRISK.uppercased() == "MODERATE" {
                                     Text(data.AHASRISK.uppercased())
                                         .padding()
                                         .background(Color.yellow)
                                         .foregroundColor(Color("darkLight"))
+                                        .frame(width: 125)
                                 }else if data.AHASRISK.uppercased() == "SEVERE" {
                                     Text(data.AHASRISK.uppercased())
                                         .padding()
                                         .background(Color.red)
                                         .foregroundColor(Color("darkLight"))
+                                        .frame(width: 125)
                                 }
-                                Spacer()
+                                Spacer().frame(width:5)
                             }
                             Divider()
                         }

@@ -34,6 +34,7 @@ struct Notices: View {
         if let url = URL(string: "https://www.notams.faa.gov/dinsQueryWeb/queryRetrievalMapAction.do?reportType=Report&retrieveLocId=\(code)&actionType=notamRetrievalByICAOs&submit=View+NOTAMs") {
             do {
                 let contents = try String(contentsOf: url)
+                print(contents)
                 var rawNOTAMs = contents.components(separatedBy:"PRE")
                 rawNOTAMs.remove(at: 0)
                 var y = 0
@@ -51,27 +52,46 @@ struct Notices: View {
                 }
                 return processedNOTAMs
             } catch {
-                return [NOTAM(Title: "ERR", Alert: "ERR")]
+                return [NOTAM(Title: "", Alert: "NOTAMs For The Selected Airport Could Not Be Loaded")]
             }
         } else {
-            return [NOTAM(Title: "ERR", Alert: "ERR")]
+            return [NOTAM(Title: "", Alert: "NOTAMs For The Selected Airport Could Not Be Loaded")]
         }
         
     }
     @State var NOTAMs:[NOTAM] = []
-
+    
     
     var body: some View {
         VStack {
+            HStack{
+                Text(getActive() + " NOTAMs")
+                    .padding(10)
+                    .background(Color.accentColor)
+                    .foregroundColor(Color("darkLight"))
+                    .cornerRadius(10)
+                    .font(.largeTitle)
+                Button(action: {
+                    NOTAMs = downloadNOTAMs(code: getActive())
+                }, label: {
+                    Image(systemName: "arrow.clockwise")
+                        .padding(10)
+                        .background(Color.accentColor)
+                        .foregroundColor(Color("darkLight"))
+                        .cornerRadius(10)
+                        .font(.largeTitle)
+                })
+            }
             ScrollView {
                 VStack{
                     ForEach(NOTAMs, id: \.self.id) { notice in
                         Text(notice.Title!).bold() + Text(notice.Alert!)
+                        Divider()
                     }
-                }
+                }.padding(15)
             }
         }.onAppear(perform: {
-                    NOTAMs = downloadNOTAMs(code: getActive())
+            NOTAMs = downloadNOTAMs(code: getActive())
         })
     }
 }

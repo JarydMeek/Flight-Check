@@ -16,6 +16,7 @@ import MapKit
 /* LISTS */
 
 struct Airports: View {
+    @State var showsAlert = true
     @Environment(\.managedObjectContext) var context
     @FetchRequest(
        entity: Airport.entity(),
@@ -103,6 +104,7 @@ struct Airports: View {
 
 struct airportRow: View {
     @ObservedObject var airport: Airport
+    @Environment(\.managedObjectContext) var context
     var body: some View {
         HStack{
             if(airport.active) {
@@ -111,6 +113,23 @@ struct airportRow: View {
                 Image(systemName: "circle.fill").opacity(0)
             }
             Text(airport.code ?? "Error")
+            Spacer()
+            if(airport.favorite) {
+                Button(action: {
+                    airport.favorite.toggle()
+                    try? context.save()
+                }) {
+                    Image(systemName: "star.fill").foregroundColor(.yellow)
+                }
+                
+            } else {
+                Button(action: {
+                    airport.favorite.toggle()
+                    try? context.save()
+                }) {
+                    Image(systemName: "star").foregroundColor(.gray)
+                }
+            }
         }
     }
 }
@@ -118,7 +137,8 @@ struct AirportEditor: View {
     @Environment(\.managedObjectContext) var context
     @FetchRequest(
        entity: Airport.entity(),
-        sortDescriptors: [NSSortDescriptor(keyPath: \Airport.dateAdded, ascending: false)]
+        sortDescriptors: [NSSortDescriptor(keyPath: \Airport.favorite, ascending: false),
+                          NSSortDescriptor(keyPath: \Airport.dateAdded, ascending: false)]
     ) var airports: FetchedResults<Airport>
     @Environment(\.presentationMode) var presentationMode
     
@@ -136,7 +156,7 @@ struct AirportEditor: View {
                 }
                 .navigationBarTitle("Select Airport")
                 .navigationBarItems(trailing:
-                NavigationLink(destination: AddAirport()) {
+                NavigationLink(destination: AddAirport()){
                     Image(systemName: "plus")
                 }
                 )
@@ -257,6 +277,7 @@ struct AddAirport: View {
         newAirport.active = true
         newAirport.lat = METARData.getLat(code: airportCode.uppercased())
         newAirport.lon = METARData.getLon()
+        newAirport.favorite = false
         if (newAirport.lat == 0.0 && newAirport.lon == 0.0) {
             context.delete(newAirport)
             return false

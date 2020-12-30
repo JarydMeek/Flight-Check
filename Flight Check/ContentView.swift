@@ -6,15 +6,40 @@
 //  Copyright © 2020 Jaryd Meek. All rights reserved.
 //
 
+//if(Chicken){
+// Little
+//}
+
+
+
+
 import SwiftUI
 import CoreData
 import MapKit
 
 struct ContentView: View {
+    @Environment(\.managedObjectContext) var context
+    @FetchRequest(
+       entity: Airport.entity(),
+        sortDescriptors: [NSSortDescriptor(keyPath: \Airport.dateAdded, ascending: false)]
+    ) var airports: FetchedResults<Airport>
+    @State private var selection = 0
+    @State var showsAlert = true
     
-@State private var selection = 0
+    
+    func getActive() -> String {
+        for curr in airports {
+            if (curr.active) {
+                return String(curr.code!)
+            }
+        }
+        return "No Selected Airport Currently"
+    }
     
 var body: some View {
+    if(getActive() == "No Selected Airport Currently"){
+        Airports()
+    } else {
     TabView(selection: $selection){
             //First Page -> Weather?
             Airports().tabItem {
@@ -46,8 +71,15 @@ var body: some View {
                 }
             }
                 .tag(3)
-        }
+    }.alert(isPresented: self.$showsAlert) {
+        Alert(title: Text("Warning"), message: Text("This app is intended for quick reference flight planning ONLY. It should not replace a thorough comprehensive flight planning process. While all data pulls from official sources, YOU are responsible for checking the validity of that data."), dismissButton: .default(Text("Are you silly? I'm still gonna send it")))
     }
+    //.alert(isPresented: self.$showsAlert) {
+     //  Alert(title: Text("EVEN MORE IMPORTANT WARNING"), message: Text("If you're a FAIP, you legally have to tell us. Otherwise it's entrapment"), dismissButton: .default(Text("No, I didn't cry on Drop Night")))
+   //}
+    }
+    }
+    
 }
 
 /* HANDLERS */
@@ -219,3 +251,34 @@ struct ContentView_Previews: PreviewProvider {
         ContentView()
     }
 }
+
+
+//String handling
+extension String {
+
+    var length: Int {
+        return count
+    }
+
+    subscript (i: Int) -> String {
+        return self[i ..< i + 1]
+    }
+
+    func substring(fromIndex: Int) -> String {
+        return self[min(fromIndex, length) ..< length]
+    }
+
+    func substring(toIndex: Int) -> String {
+        return self[0 ..< max(0, toIndex)]
+    }
+
+    subscript (r: Range<Int>) -> String {
+        let range = Range(uncheckedBounds: (lower: max(0, min(length, r.lowerBound)),
+                                            upper: min(length, max(0, r.upperBound))))
+        let start = index(startIndex, offsetBy: range.lowerBound)
+        let end = index(start, offsetBy: range.upperBound - range.lowerBound)
+        return String(self[start ..< end])
+    }
+}
+
+
