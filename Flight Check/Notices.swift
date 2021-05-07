@@ -34,7 +34,6 @@ struct Notices: View {
         if let url = URL(string: "https://www.notams.faa.gov/dinsQueryWeb/queryRetrievalMapAction.do?reportType=Report&retrieveLocId=\(code)&actionType=notamRetrievalByICAOs&submit=View+NOTAMs") {
             do {
                 let contents = try String(contentsOf: url)
-                print(contents)
                 var rawNOTAMs = contents.components(separatedBy:"PRE")
                 rawNOTAMs.remove(at: 0)
                 var y = 0

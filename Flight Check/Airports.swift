@@ -19,7 +19,7 @@ struct Airports: View {
     @State var showsAlert = true
     @Environment(\.managedObjectContext) var context
     @FetchRequest(
-       entity: Airport.entity(),
+        entity: Airport.entity(),
         sortDescriptors: [NSSortDescriptor(keyPath: \Airport.dateAdded, ascending: false)]
     ) var airports: FetchedResults<Airport>
     
@@ -81,7 +81,7 @@ struct Airports: View {
                         .frame(minWidth: 0, maxWidth: .infinity, minHeight: 0, maxHeight: .infinity)
                         .edgesIgnoringSafeArea(.all)
                 }
-
+                
                 Text(getActive())
                     .padding(5)
                     .background(Color("darkLight").opacity(0.75))
@@ -89,14 +89,14 @@ struct Airports: View {
                     .font(.largeTitle)
                     .cornerRadius(10)
                     .frame(height: 200)
-                    NavigationLink(destination: AirportEditor()) {
-                        Text("Change Active Airport")
-                    }
-                    .padding(10)
-                    .background(Color.accentColor)
-                    .foregroundColor(Color("darkLight"))
-                    .cornerRadius(10)
-                    .frame(height: 75)
+                NavigationLink(destination: AirportEditor()) {
+                    Text("Change Active Airport")
+                }
+                .padding(10)
+                .background(Color.accentColor)
+                .foregroundColor(Color("darkLight"))
+                .cornerRadius(10)
+                .frame(height: 75)
             }.frame(maxHeight: .infinity)
         }.navigationViewStyle(StackNavigationViewStyle())
     }
@@ -136,45 +136,50 @@ struct airportRow: View {
 struct AirportEditor: View {
     @Environment(\.managedObjectContext) var context
     @FetchRequest(
-       entity: Airport.entity(),
+        entity: Airport.entity(),
         sortDescriptors: [NSSortDescriptor(keyPath: \Airport.favorite, ascending: false),
                           NSSortDescriptor(keyPath: \Airport.dateAdded, ascending: false)]
     ) var airports: FetchedResults<Airport>
     @Environment(\.presentationMode) var presentationMode
     
-        var body: some View {
-            VStack{
+    @State var loadingViewShowing = false
+    @State var downloading:Int? = 0
+    
+    var body: some View {
+        VStack{
+            LoadingView(isShowing: $loadingViewShowing) {
                 List {
                     ForEach(airports){ airport in
                         Button(action: {
+                            loadingViewShowing = true
                             self.makeActive(airport)
                         }){
-                        airportRow(airport: airport)
+                            airportRow(airport: airport)
                         }
-
+                        
                     }.onDelete(perform: removeAirport)
                 }
                 .navigationBarTitle("Select Airport")
                 .navigationBarItems(trailing:
-                NavigationLink(destination: AddAirport()){
-                    Image(systemName: "plus")
-                }
+                                        NavigationLink(destination: AddAirport(loadData: $loadingViewShowing)){
+                                            Image(systemName: "plus")
+                                        }
                 )
             }
         }
-        func removeAirport(at offsets: IndexSet) {
-            for index in offsets {
-                let airport = airports[index]
-                context.delete(airport)
-                try? context.save()
-            }
+    }
+    func removeAirport(at offsets: IndexSet) {
+        for index in offsets {
+            let airport = airports[index]
+            context.delete(airport)
+            try? context.save()
         }
+    }
     func makeActive(_ airport: Airport){
         for curr in airports {
             curr.active = false
         }
         airport.active = true
-        self.presentationMode.wrappedValue.dismiss()
     }
 }
 
@@ -183,7 +188,7 @@ struct AirportEditor: View {
 struct AddAirport: View {
     @Environment(\.managedObjectContext) var context
     @FetchRequest(
-       entity: Airport.entity(),
+        entity: Airport.entity(),
         sortDescriptors: [NSSortDescriptor(keyPath: \Airport.dateAdded, ascending: false)]
     ) var airports: FetchedResults<Airport>
     @Environment(\.presentationMode) var presentationMode
@@ -192,74 +197,75 @@ struct AddAirport: View {
         case duplicate, wrongLength, invalidCode
     }
     
-
+    
     
     @State private var airportCode: String = ""
     @State private var showAlert = false
     @State private var selectAlert: activeAlert = .wrongLength
+    @Binding var loadData:Bool
     
-
     
     @State var goBack = false
     
     var body: some View {
         NavigationView{
             VStack{
-                    TextField("Enter Airport Code", text: $airportCode)
-                        .padding(5)
-                        .background(Color("lightDark").opacity(0.10))
-                        .foregroundColor(Color("lightDark"))
-                        .font(.title)
-                        .cornerRadius(10)
-                        .frame(width: 250)
-                        .multilineTextAlignment(.center)
-                        .disableAutocorrection(true)
-                    Button(action: {
-                        if (self.airportCode.count == 4) {
-                            var duplicate = false
-                            for curr in self.airports {
-                                if (curr.code == self.airportCode.uppercased()) {
-                                    duplicate = true
-                                }
+                TextField("Enter Airport Code", text: $airportCode)
+                    .padding(5)
+                    .background(Color("lightDark").opacity(0.10))
+                    .foregroundColor(Color("lightDark"))
+                    .font(.title)
+                    .cornerRadius(10)
+                    .frame(width: 250)
+                    .multilineTextAlignment(.center)
+                    .disableAutocorrection(true)
+                Button(action: {
+                    if (self.airportCode.count == 4) {
+                        var duplicate = false
+                        for curr in self.airports {
+                            if (curr.code == self.airportCode.uppercased()) {
+                                duplicate = true
                             }
-                            if (duplicate) {
-                                self.selectAlert = .duplicate
-                                self.showAlert = true
-                            } else {
-                                let resultOfAdd = self.addAirport()
-                                
-                                if (resultOfAdd) {
-                                    self.presentationMode.wrappedValue.dismiss()
-                                } else {
-                                    self.selectAlert = .invalidCode
-                                    self.showAlert = true
-                                }
-                                
-
-                            }
-                        } else {
-                            self.selectAlert = .wrongLength
+                        }
+                        if (duplicate) {
+                            self.selectAlert = .duplicate
                             self.showAlert = true
+                        } else {
+                            let resultOfAdd = self.addAirport()
+                            
+                            if (resultOfAdd) {
+                                self.presentationMode.wrappedValue.dismiss()
+                                loadData = true
+                            } else {
+                                self.selectAlert = .invalidCode
+                                self.showAlert = true
+                            }
+                            
                             
                         }
-                    }){
-                        Text("Add Airport")
-                    }.alert(isPresented: $showAlert) {
-                        switch selectAlert{
-                            case .wrongLength:
-                                return Alert(title: Text("Error Adding Airport"), message: Text("Please Enter A 4 Digit Airport Identifier"), dismissButton: .default(Text("Got it!")))
-                            case .duplicate:
-                                   return Alert(title: Text("Error Adding Airport"), message: Text("Airport Already Added"), dismissButton: .default(Text("Got it!")))
-                            case .invalidCode:
-                                   return Alert(title: Text("Error Adding Airport"), message: Text("Invalid Airport Code"), dismissButton: .default(Text("Got it!")))
-                        }
+                    } else {
+                        self.selectAlert = .wrongLength
+                        self.showAlert = true
                         
                     }
-                    .padding(10)
-                    .background(Color.accentColor)
-                    .foregroundColor(Color("darkLight"))
-                    .cornerRadius(10)
-                    .frame(height: 75)
+                }){
+                    Text("Add Airport")
+                }.alert(isPresented: $showAlert) {
+                    switch selectAlert{
+                    case .wrongLength:
+                        return Alert(title: Text("Error Adding Airport"), message: Text("Please Enter A 4 Digit Airport Identifier"), dismissButton: .default(Text("Got it!")))
+                    case .duplicate:
+                        return Alert(title: Text("Error Adding Airport"), message: Text("Airport Already Added"), dismissButton: .default(Text("Got it!")))
+                    case .invalidCode:
+                        return Alert(title: Text("Error Adding Airport"), message: Text("Invalid Airport Code"), dismissButton: .default(Text("Got it!")))
+                    }
+                    
+                }
+                .padding(10)
+                .background(Color.accentColor)
+                .foregroundColor(Color("darkLight"))
+                .cornerRadius(10)
+                .frame(height: 75)
                 Spacer()
             }
         }.navigationViewStyle(StackNavigationViewStyle())
@@ -287,7 +293,121 @@ struct AddAirport: View {
             
         }
     }
+    
+}
 
+struct LoadingView<Content>: View where Content: View {
+    
+    
+    @Binding var isShowing: Bool  // should the modal be visible?
+    var content: () -> Content
+    var text: String?  // the text to display under the ProgressView - defaults to "Loading..."
+    @State private var downloadAmount = 0.0
+    let timer = Timer.publish(every: 0.1, on: .main, in: .common).autoconnect()
+    @Environment(\.presentationMode) var presentationMode
+    
+    
+    //States for loading in data, 0 = not attempted, 1 = downloaded successfully, 2 = failed
+    @State var metarDownload: Int = 0
+    @State var tafDownload: Int = 0
+    @State var notamDownload: Int = 0
+    @State var ahasDownload: Int = 0
+    
+    var body: some View {
+        GeometryReader { geometry in
+            ZStack(alignment: .center) {
+                // the content to display - if the modal is showing, we'll blur it
+                content()
+                    .disabled(isShowing)
+                    .blur(radius: isShowing ? 2 : 0)
+                
+                // all contents inside here will only be shown when isShowing is true
+                if isShowing {
+                    // this Rectangle is a semi-transparent black overlay
+                    Rectangle()
+                        .fill(Color.black).opacity(isShowing ? 0.6 : 0)
+                        .edgesIgnoringSafeArea(.all)
+                    
+                    // the magic bit - our ProgressView just displays an activity
+                    // indicator, with some text underneath showing what we are doing
+                    VStack{
+                        Spacer()
+                        Text("Downloading Data").font(.system(size:18))
+                        Spacer()
+                        HStack{
+                            Text("METARs")
+                            Spacer()
+                            if (metarDownload == 0){
+                                ProgressView()
+                            }else if (metarDownload == 1) {
+                                Image(systemName: "checkmark.circle").foregroundColor(.green)
+                            }else{
+                                Image(systemName: "xmark.circle").foregroundColor(.red)
+                            }
+                        }
+                        Spacer()
+                        HStack{
+                            Text("TAFs")
+                            Spacer()
+                            if (tafDownload == 0){
+                                ProgressView()
+                            }else if (tafDownload == 1) {
+                                Image(systemName: "checkmark.circle").foregroundColor(.green)
+                            }else{
+                                Image(systemName: "xmark.circle").foregroundColor(.red)
+                            }
+                        }
+                        Spacer()
+                        HStack{
+                            Text("NOTAMs")
+                            Spacer()
+                            if (notamDownload == 0){
+                                ProgressView()
+                            }else if (notamDownload == 1) {
+                                Image(systemName: "checkmark.circle").foregroundColor(.green)
+                            }else{
+                                Image(systemName: "xmark.circle").foregroundColor(.red)
+                            }
+                        }
+                        Spacer()
+                        HStack{
+                            Text("AHAS Data")
+                            Spacer()
+                            if (ahasDownload == 0){
+                                ProgressView()
+                            }else if (ahasDownload == 1) {
+                                Image(systemName: "checkmark.circle").foregroundColor(.green)
+                            }else{
+                                Image(systemName: "xmark.circle").foregroundColor(.red)
+                            }
+                        }
+                    }.padding(15)
+                    
+                    .onReceive(timer) { _ in
+                        if downloadAmount < 100 {
+                            downloadAmount += 2
+                            if downloadAmount > 50{
+                                ahasDownload = 1
+                                tafDownload = 1
+                                metarDownload = 1
+                                
+                            }
+                        } else {
+                            notamDownload = 2
+                            DispatchQueue.main.asyncAfter(deadline: .now() + 3) {
+                                self.presentationMode.wrappedValue.dismiss()
+                            }
+                            
+                        }
+                    }
+                    .frame(width: 250, height: 200)
+                    .background(Color.white)
+                    .foregroundColor(Color.primary)
+                    .cornerRadius(16)
+                }
+            }
+        }
+    }
 }
 
 struct Airports_Previews: PreviewProvider {

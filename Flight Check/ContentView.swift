@@ -3,30 +3,27 @@
 //  FlightApp
 //
 //  Created by Jaryd Meek on 5/8/20.
-//  Copyright © 2020 Jaryd Meek. All rights reserved.
-//
-
-//if(Chicken){
-// Little
-//}
-
-
+//  Copyright © 2021 Jaryd Meek. All rights reserved.
 
 
 import SwiftUI
 import CoreData
 import MapKit
 
+//Default View
 struct ContentView: View {
+    //CoreData Stuff
     @Environment(\.managedObjectContext) var context
     @FetchRequest(
-       entity: Airport.entity(),
+        entity: Airport.entity(),
         sortDescriptors: [NSSortDescriptor(keyPath: \Airport.dateAdded, ascending: false)]
     ) var airports: FetchedResults<Airport>
+    
+    //Variables
     @State private var selection = 0
     @State var showsAlert = true
     
-    
+    //Returns active airport code, if one exists
     func getActive() -> String {
         for curr in airports {
             if (curr.active) {
@@ -36,48 +33,51 @@ struct ContentView: View {
         return "No Selected Airport Currently"
     }
     
-var body: some View {
-    if(getActive() == "No Selected Airport Currently"){
-        Airports()
-    } else {
-    TabView(selection: $selection){
-            //First Page -> Weather?
-            Airports().tabItem {
+    var body: some View {
+        //checks to see if there's an active airport, if there isn't only show user the airports tab so they can select an airport
+        if(getActive() == "No Selected Airport Currently"){
+            Airports()
+        } else {
+            
+            //If a user has an active airport, show the bottom bar so they can choose what data they want to view.
+            TabView(selection: $selection){
+                //Airports
+                Airports().tabItem {
                     VStack {
                         Image(systemName: "mappin.and.ellipse")
                         Text("Airports")
                     }
                 }
                 .tag(0)
-            //
-            Weather().tabItem {
-                VStack {
-                    Image(systemName: "cloud.sun")
-                    Text("Weather")
+                //Weather
+                Weather().tabItem {
+                    VStack {
+                        Image(systemName: "cloud.sun")
+                        Text("Weather")
+                    }
                 }
-            }
                 .tag(1)
-            Notices().tabItem {
-                VStack {
-                    Image(systemName: "exclamationmark.circle")
-                    Text("NOTAMs")
+                //NOTAMs
+                Notices().tabItem {
+                    VStack {
+                        Image(systemName: "exclamationmark.circle")
+                        Text("NOTAMs")
+                    }
                 }
-            }
                 .tag(2)
-            Birds().tabItem {
-                VStack {
-                    Image("chick")
-                    Text("Birbs")
+                //Birds
+                Birds().tabItem {
+                    VStack {
+                        Image("chick")
+                        Text("AHAS Risk")
+                    }
                 }
-            }
                 .tag(3)
-    }.alert(isPresented: self.$showsAlert) {
-        Alert(title: Text("Warning"), message: Text("This app is intended for quick reference flight planning ONLY. It should not replace a thorough comprehensive flight planning process. While all data pulls from official sources, YOU are responsible for checking the validity of that data."), dismissButton: .default(Text("Are you silly? I'm still gonna send it")))
-    }
-    //.alert(isPresented: self.$showsAlert) {
-     //  Alert(title: Text("EVEN MORE IMPORTANT WARNING"), message: Text("If you're a FAIP, you legally have to tell us. Otherwise it's entrapment"), dismissButton: .default(Text("No, I didn't cry on Drop Night")))
-   //}
-    }
+            }.alert(isPresented: self.$showsAlert) {
+                //Disclaimer
+                Alert(title: Text("Warning"), message: Text("This app is intended for quick reference flight planning ONLY. It should not replace a thorough comprehensive flight planning process. While all data pulls from official sources, YOU are responsible for checking the validity of that data."), dismissButton: .default(Text("Understood")))
+            }
+        }
     }
     
 }
@@ -85,6 +85,8 @@ var body: some View {
 /* HANDLERS */
 
 /* METARS AND TAFS */
+
+//Handles the download and interpretation of data from the various APIs
 
 class METARHandler {
     @State var getDataSuccesfully = false
@@ -116,7 +118,7 @@ class METARHandler {
             return "ERROR"
         }
     }
-
+    
     func getSpecificMETAR(code: String) -> String {
         var counter = 0
         for currentMETAR in allMETARs {
@@ -159,7 +161,7 @@ class METARHandler {
         return lon
     }
     
-
+    
     func refresh() {
         allMETARs = getAllMETARs()
     }
@@ -255,23 +257,23 @@ struct ContentView_Previews: PreviewProvider {
 
 //String handling
 extension String {
-
+    
     var length: Int {
         return count
     }
-
+    
     subscript (i: Int) -> String {
         return self[i ..< i + 1]
     }
-
+    
     func substring(fromIndex: Int) -> String {
         return self[min(fromIndex, length) ..< length]
     }
-
+    
     func substring(toIndex: Int) -> String {
         return self[0 ..< max(0, toIndex)]
     }
-
+    
     subscript (r: Range<Int>) -> String {
         let range = Range(uncheckedBounds: (lower: max(0, min(length, r.lowerBound)),
                                             upper: min(length, max(0, r.upperBound))))

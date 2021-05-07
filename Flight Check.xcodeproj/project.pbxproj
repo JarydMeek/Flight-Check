@@ -41,7 +41,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
-		426960D324EF7A64000AF4D1 /* icaoToNameAHAS.csv */ = {isa = PBXFileReference; lastKnownFileType = text; name = icaoToNameAHAS.csv; path = "Convert String to CSV for AHAS/icaoToNameAHAS.csv"; sourceTree = SOURCE_ROOT; };
+		426960D324EF7A64000AF4D1 /* icaoToNameAHAS.csv */ = {isa = PBXFileReference; lastKnownFileType = text; path = icaoToNameAHAS.csv; sourceTree = SOURCE_ROOT; };
 		42CDEF1A24A1706D008010DD /* Flight Check.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = "Flight Check.entitlements"; sourceTree = "<group>"; };
 		42D582B8246617CC006E392B /* Flight Check.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Flight Check.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		42D582BB246617CC006E392B /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
@@ -468,7 +468,7 @@
 				DEVELOPMENT_TEAM = 2X8S526W34;
 				ENABLE_PREVIEWS = YES;
 				INFOPLIST_FILE = "Flight Check/Info.plist";
-				IPHONEOS_DEPLOYMENT_TARGET = 14.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 14.5;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -492,7 +492,7 @@
 				DEVELOPMENT_TEAM = 2X8S526W34;
 				ENABLE_PREVIEWS = YES;
 				INFOPLIST_FILE = "Flight Check/Info.plist";
-				IPHONEOS_DEPLOYMENT_TARGET = 14.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 14.5;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
