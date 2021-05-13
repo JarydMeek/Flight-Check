@@ -15,9 +15,6 @@ struct Weather: View {
         sortDescriptors: [NSSortDescriptor(keyPath: \Airport.dateAdded, ascending: false)]
     ) var airports: FetchedResults<Airport>
     
-    
-    let METARData = METARHandler()
-    let TAFData = TAFHandler()
     @State var currentMETAR: String = "Loading..."
     @State var currentTAF: String = "Loading..."
     
@@ -28,13 +25,6 @@ struct Weather: View {
             }
         }
         return "No Selected Airport Currently"
-    }
-
-    func loadData() {
-        METARData.refresh()
-        currentMETAR = METARData.getSpecificMETAR(code: getActive())
-        TAFData.refresh()
-        currentTAF = TAFData.getSpecificTAF(code: getActive())
     }
 
     func getCurrentMETAR() -> String {
@@ -107,17 +97,6 @@ struct Weather: View {
                 .cornerRadius(10)
                 .font(.largeTitle)
                 
-                
-                Button(action: {
-                    loadData()
-                }, label: {
-                    Image(systemName: "arrow.clockwise")
-                        .padding(10)
-                        .background(Color.accentColor)
-                        .foregroundColor(Color("darkLight"))
-                        .cornerRadius(10)
-                        .font(.largeTitle)
-                })
             }
             ScrollView{
                 Text("METARs - ")
@@ -137,8 +116,6 @@ struct Weather: View {
                 Text(getCurrentTAF())
                     .padding(15)
                 Spacer()
-            }.onAppear {
-                loadData()
             }
         }
     }

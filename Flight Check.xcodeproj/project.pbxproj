@@ -15,8 +15,6 @@
 		42D582C5246617CD006E392B /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 42D582C4246617CD006E392B /* Assets.xcassets */; };
 		42D582C8246617CD006E392B /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 42D582C7246617CD006E392B /* Preview Assets.xcassets */; };
 		42D582CB246617CD006E392B /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 42D582C9246617CD006E392B /* LaunchScreen.storyboard */; };
-		42D582D6246617CD006E392B /* Flight_CheckTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 42D582D5246617CD006E392B /* Flight_CheckTests.swift */; };
-		42D582E1246617CD006E392B /* Flight_CheckUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 42D582E0246617CD006E392B /* Flight_CheckUITests.swift */; };
 		7150B59A258E8615000EA9CC /* Airports.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7150B599258E8615000EA9CC /* Airports.swift */; };
 		7150B5A2258E8724000EA9CC /* Weather.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7150B5A1258E8724000EA9CC /* Weather.swift */; };
 		7150B5A7258E8809000EA9CC /* Notices.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7150B5A6258E8809000EA9CC /* Notices.swift */; };
@@ -53,11 +51,7 @@
 		42D582CA246617CD006E392B /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		42D582CC246617CD006E392B /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		42D582D1246617CD006E392B /* Flight CheckTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "Flight CheckTests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
-		42D582D5246617CD006E392B /* Flight_CheckTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Flight_CheckTests.swift; sourceTree = "<group>"; };
-		42D582D7246617CD006E392B /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		42D582DC246617CD006E392B /* Flight CheckUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "Flight CheckUITests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
-		42D582E0246617CD006E392B /* Flight_CheckUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Flight_CheckUITests.swift; sourceTree = "<group>"; };
-		42D582E2246617CD006E392B /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		7150B599258E8615000EA9CC /* Airports.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Airports.swift; sourceTree = "<group>"; };
 		7150B5A1258E8724000EA9CC /* Weather.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Weather.swift; sourceTree = "<group>"; };
 		7150B5A6258E8809000EA9CC /* Notices.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Notices.swift; sourceTree = "<group>"; };
@@ -93,8 +87,6 @@
 			isa = PBXGroup;
 			children = (
 				42D582BA246617CC006E392B /* Flight Check */,
-				42D582D4246617CD006E392B /* Flight CheckTests */,
-				42D582DF246617CD006E392B /* Flight CheckUITests */,
 				42D582B9246617CC006E392B /* Products */,
 			);
 			sourceTree = "<group>";
@@ -136,24 +128,6 @@
 				42D582C7246617CD006E392B /* Preview Assets.xcassets */,
 			);
 			path = "Preview Content";
-			sourceTree = "<group>";
-		};
-		42D582D4246617CD006E392B /* Flight CheckTests */ = {
-			isa = PBXGroup;
-			children = (
-				42D582D5246617CD006E392B /* Flight_CheckTests.swift */,
-				42D582D7246617CD006E392B /* Info.plist */,
-			);
-			path = "Flight CheckTests";
-			sourceTree = "<group>";
-		};
-		42D582DF246617CD006E392B /* Flight CheckUITests */ = {
-			isa = PBXGroup;
-			children = (
-				42D582E0246617CD006E392B /* Flight_CheckUITests.swift */,
-				42D582E2246617CD006E392B /* Info.plist */,
-			);
-			path = "Flight CheckUITests";
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -303,7 +277,6 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				42D582D6246617CD006E392B /* Flight_CheckTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -311,7 +284,6 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				42D582E1246617CD006E392B /* Flight_CheckUITests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
