@@ -89,23 +89,51 @@ struct Airports: View {
                         .frame(minWidth: 0, maxWidth: .infinity, minHeight: 0, maxHeight: .infinity)
                         .edgesIgnoringSafeArea(.all)
                 }
+
                 //Airport Name
-                Text(getActive())
+                VStack{
+                    Spacer()
+                    Text(getActive())
+                        .font(.largeTitle)
+                        .padding(5)
+                        .background(Color("darkLight").opacity(0.75))
+                        .foregroundColor(Color("lightDark"))
+                        .cornerRadius(10)
+                    HStack{
+                        VStack{
+                            Text("Last Data Refresh:")
+                            HStack{
+                                if lastDownloaded != nil {
+                                    Text(lastDownloaded!, style: .time)
+                                    Text("-")
+                                    Text(lastDownloaded!, style: .date)
+                                } else {
+                                    Text("Data Never Loaded")
+                                }
+                            }
+                        }
+                        Button(action: {
+                            showDownload = true
+                        }, label: {
+                            Image(systemName: "arrow.clockwise")
+                                .padding(10)
+                                .foregroundColor(Color.accentColor)
+                        })
+                    }
                     .padding(5)
                     .background(Color("darkLight").opacity(0.75))
                     .foregroundColor(Color("lightDark"))
-                    .font(.largeTitle)
                     .cornerRadius(10)
-                    .frame(height: 200)
-                //Change active airport Button
-                NavigationLink(destination: AirportEditor(showDownload: $showDownload)) {
-                    Text("Change Active Airport")
+                    //Change active airport Button
+                    NavigationLink(destination: AirportEditor(showDownload: $showDownload)) {
+                        Text("Change Selected Airport")
+                    }
+                    .padding(10)
+                    .background(Color.accentColor)
+                    .foregroundColor(Color("darkLight"))
+                    .cornerRadius(10)
+                    Spacer().frame(height:20)
                 }
-                .padding(10)
-                .background(Color.accentColor)
-                .foregroundColor(Color("darkLight"))
-                .cornerRadius(10)
-                .frame(height: 75)
             }.frame(maxHeight: .infinity)
         }.navigationViewStyle(StackNavigationViewStyle())
     }
@@ -166,26 +194,26 @@ struct AirportEditor: View {
     @Binding var showDownload:Bool
     
     var body: some View {
-                VStack{
-                    List {
-                        //show all airports
-                        ForEach(airports){ airport in
-                            Button(action: { //if airport is picked, make active, download data, and dismiss view.
-                                showDownload = true
-                                self.presentationMode.wrappedValue.dismiss()
-                                self.makeActive(airport)
-                            }){
-                                airportRow(airport: airport)
-                            }
-                            
-                        }.onDelete(perform: removeAirport) // swipe to delete
+        VStack{
+            List {
+                //show all airports
+                ForEach(airports){ airport in
+                    Button(action: { //if airport is picked, make active, download data, and dismiss view.
+                        showDownload = true
+                        self.presentationMode.wrappedValue.dismiss()
+                        self.makeActive(airport)
+                    }){
+                        airportRow(airport: airport)
                     }
-                    .navigationBarTitle("Select Airport")
-                    .navigationBarItems(trailing:
-                                            NavigationLink(destination: AddAirport(loadData: $showDownload)){
-                                                Image(systemName: "plus")
-                                            }
-                    )
+                    
+                }.onDelete(perform: removeAirport) // swipe to delete
+            }
+            .navigationBarTitle("Select Airport")
+            .navigationBarItems(trailing:
+                                    NavigationLink(destination: AddAirport(loadData: $showDownload)){
+                                        Image(systemName: "plus")
+                                    }
+            )
         }
     }
     
