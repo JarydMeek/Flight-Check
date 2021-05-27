@@ -53,7 +53,7 @@ struct Airports: View {
                 return String(curr.code!)
             }
         }
-        return "No Active Airport"
+        return "No Airport Selected"
     }
     
     /* MAPKIT STUFF */
@@ -79,7 +79,7 @@ struct Airports: View {
         NavigationView{
             ZStack(alignment: .bottom) {
                 // show map of current active airport
-                if (getActive() != "No Active Airport") {
+                if (getActive() != "No Airport Selected") {
                     MapView(coordinates: CLLocationCoordinate2D(latitude: getLat(), longitude: getLon()), span: MKCoordinateSpan(latitudeDelta: 0.05, longitudeDelta: 0.12))
                         .frame(minWidth: 0, maxWidth: .infinity, minHeight: 0, maxHeight: .infinity)
                         .edgesIgnoringSafeArea(.all)
@@ -99,39 +99,60 @@ struct Airports: View {
                         .background(Color("darkLight").opacity(0.75))
                         .foregroundColor(Color("lightDark"))
                         .cornerRadius(10)
-                    HStack{
-                        VStack{
-                            Text("Last Data Refresh:")
-                            HStack{
-                                if lastDownloaded != nil {
-                                    Text(lastDownloaded!, style: .time)
-                                    Text("-")
-                                    Text(lastDownloaded!, style: .date)
-                                } else {
-                                    Text("Data Never Loaded")
+                    if (getActive() != "No Airport Selected") {
+                        HStack{
+                            VStack{
+                                Text("Last Data Refresh:")
+                                HStack{
+                                    if lastDownloaded != nil {
+                                        Text(lastDownloaded!, style: .time)
+                                        Text("-")
+                                        Text(lastDownloaded!, style: .date)
+                                    } else {
+                                        Text("Data Never Loaded")
+                                    }
                                 }
                             }
+                            Button(action: {
+                                showDownload = true
+                            }, label: {
+                                Image(systemName: "arrow.clockwise")
+                                    .padding(10)
+                                    .foregroundColor(Color.accentColor)
+                            })
                         }
-                        Button(action: {
-                            showDownload = true
-                        }, label: {
-                            Image(systemName: "arrow.clockwise")
-                                .padding(10)
-                                .foregroundColor(Color.accentColor)
-                        })
+                        
+                        .padding(5)
+                        .background(Color("darkLight").opacity(0.75))
+                        .foregroundColor(Color("lightDark"))
+                        .cornerRadius(10)
+                        //Change active airport Button
+                        HStack {
+                            Spacer().frame(maxWidth: 100)
+                            NavigationLink(destination: AirportEditor(showDownload: $showDownload)) {
+                                Text("Change Selected Airport")
+                            }.frame(minWidth: 250)
+                            Spacer().frame(maxWidth: 100)
+                        }
+                        .frame(height: 50)
+                        .background(Color.accentColor)
+                        .cornerRadius(15)
+                        .padding(10)
+                        .foregroundColor(Color("darkLight"))
+                    } else {
+                        HStack {
+                            Spacer().frame(maxWidth: 100)
+                            NavigationLink(destination: AirportEditor(showDownload: $showDownload)) {
+                                Text("Select An Airport")
+                            }.frame(minWidth: 250)
+                            Spacer().frame(maxWidth: 100)
+                        }
+                        .frame(height: 50)
+                        .background(Color.accentColor)
+                        .cornerRadius(15)
+                        .padding(10)
+                        .foregroundColor(Color("darkLight"))
                     }
-                    .padding(5)
-                    .background(Color("darkLight").opacity(0.75))
-                    .foregroundColor(Color("lightDark"))
-                    .cornerRadius(10)
-                    //Change active airport Button
-                    NavigationLink(destination: AirportEditor(showDownload: $showDownload)) {
-                        Text("Change Selected Airport")
-                    }
-                    .padding(10)
-                    .background(Color.accentColor)
-                    .foregroundColor(Color("darkLight"))
-                    .cornerRadius(10)
                     Spacer().frame(height:20)
                 }
             }.frame(maxHeight: .infinity)
@@ -267,6 +288,12 @@ struct AddAirport: View {
         NavigationView{
             VStack{
                 //box to add airport code
+                Text("Please enter the desired airport's 4 Letter ICAO Airport Code")
+                    .multilineTextAlignment(.center)
+                Text("Example: KDEN = Denver International Airport")
+                    .foregroundColor(Color.gray)
+                    .multilineTextAlignment(.center)
+                Spacer().frame(height:20)
                 TextField("Enter Airport Code", text: $airportCode)
                     .padding(5)
                     .background(Color("lightDark").opacity(0.10))
@@ -276,7 +303,11 @@ struct AddAirport: View {
                     .frame(width: 250)
                     .multilineTextAlignment(.center)
                     .disableAutocorrection(true)
+                Spacer().frame(height:20)
                 //add airport button.
+                HStack {
+                    Spacer().frame(maxWidth: 100)
+
                 Button(action: {
                     //makes sure we can verify the icao code
                     if (METARData.download() == 2) {
@@ -335,11 +366,14 @@ struct AddAirport: View {
                     }
                     
                 }
-                .padding(10)
-                .background(Color.accentColor)
-                .foregroundColor(Color("darkLight"))
-                .cornerRadius(10)
-                .frame(height: 75)
+                .frame(minWidth: 250)
+            Spacer().frame(maxWidth: 100)
+        }
+        .frame(height: 50)
+        .background(Color.accentColor)
+        .cornerRadius(15)
+        .padding(10)
+        .foregroundColor(Color("darkLight"))
                 Spacer()
             }
         }.navigationViewStyle(StackNavigationViewStyle())

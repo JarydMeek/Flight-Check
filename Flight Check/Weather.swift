@@ -99,7 +99,7 @@ struct Weather: View {
                 
             }
             ScrollView{
-                Text("METARs - ")
+                Text("METARs:")
                     .padding(5)
                     .background(Color("lightDark").opacity(0.75))
                     .foregroundColor(Color("darkLight"))
@@ -107,7 +107,7 @@ struct Weather: View {
                     .cornerRadius(10)
                 Text(getCurrentMETAR()).frame(height: 150)
                     .padding(15)
-                Text("TAFs - ")
+                Text("TAFs:")
                     .padding(5)
                     .background(Color("lightDark").opacity(0.75))
                     .foregroundColor(Color("darkLight"))

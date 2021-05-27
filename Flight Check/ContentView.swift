@@ -29,8 +29,8 @@ struct ContentView: View {
     
     //Variables
     @State private var selection = 0 //Tracks tab
-    @State var showsAlert = true //tracks alerts
     @State var downloadData:Bool = false //shows download screen
+    @State var firstOpen = false //Show first warning
     
     //Returns active airport code, if one exists
     func getActive() -> String {
@@ -46,6 +46,11 @@ struct ContentView: View {
         ZStack{
             if(getActive() == "No Selected Airport Currently"){ //checks to see if there's an active airport, if there isn't only show user the airports tab so they can select an airport
                 Airports(showDownload: $downloadData)
+                    .sheet(isPresented: $firstOpen) {
+                    WelcomeScreen(showWarning: $firstOpen)
+                    }.onAppear{
+                        firstOpen = true
+                    }
             } else { //If a user has an active airport, show the bottom bar so they can choose what data they want to view.
                 TabView(selection: $selection){
                     //Airports
@@ -84,18 +89,87 @@ struct ContentView: View {
                 .onAppear{
                     downloadData = true
                 }
-                .alert(isPresented: self.$showsAlert) {
-                    //Disclaimer
-                    Alert(title: Text("Warning"), message: Text("This app is intended for quick reference flight planning ONLY. It should not replace a thorough comprehensive flight planning process. While all data pulls from official sources, YOU are responsible for checking the validity of that data."), dismissButton: .default(Text("Understood")))
-                }
             }
            if (downloadData){ //If we are downloading data, show the user a download screen
             downloadingData(isShowing: $downloadData)
            }
         }
+        .accentColor(Color("lightBlue"))
         
     }
     
+}
+
+/* First Welcome / Warning */
+
+//Helper
+struct Row: View {
+    var image: String
+    var title: String
+    var subtitle: String
+    var color: Color
+    
+    var body: some View {
+        HStack(spacing: 24) {
+            Image(systemName: image)
+                .resizable()
+                .aspectRatio(contentMode: .fit)
+                .frame(width: 32)
+                .foregroundColor(color)
+                    
+            VStack(alignment: .leading, spacing: 2) {
+                Text(title)
+                    .font(.subheadline)
+                    .fontWeight(.semibold)
+                Text(subtitle)
+                    .foregroundColor(.secondary)
+                    .font(.subheadline)
+            }
+            
+            Spacer()
+        }
+    }
+}
+
+struct WelcomeScreen: View {
+    @Binding var showWarning: Bool
+    
+    var body: some View {
+        VStack {
+            Spacer()
+            Text("Welcome to Flight Check")
+                .font(.largeTitle)
+                .fontWeight(.bold)
+                .multilineTextAlignment(.center)
+                .padding(.horizontal, 48)
+            Image("plane")
+            Spacer()
+            VStack(spacing: 24) {
+                Row(image: "exclamationmark.triangle", title: "Warning", subtitle: "This app is intended for quick reference flight planning ONLY. It should not replace a thorough comprehensive flight planning process. While all data pulls from official sources, YOU are responsible for checking the validity of that data.", color: .orange)
+                
+                Row(image: "terminal", title: "Open Source", subtitle: "This app is entirely open source and any issues can be reported at: \nhttps://github.com/JarydMeek/Flight-Check", color: .blue)
+            }
+            .padding(.leading)
+            
+            Spacer()
+            Spacer()
+            
+            Button(action: { showWarning = false }) {
+                HStack {
+                    Spacer()
+                    Text("Continue")
+                        .font(.headline)
+                        .foregroundColor(.white)
+                    Spacer()
+                }
+            }
+            .frame(height: 50)
+            .background(Color.accentColor)
+            .cornerRadius(15)
+        }
+        .accentColor(Color("lightBlue"))
+        .padding()
+    }
 }
 
 /* Downloading VIEW */
@@ -316,7 +390,6 @@ class METARHandler {
     //Returns a tuple containing lattitude and longitude for the given airport
     func getLocation(code: String) -> (lat: Double, lon: Double) {
         var counter = 0
-        print(METARs.count)
         for currentMETAR in METARs {
             if counter >= METARs.count {
                 break
@@ -574,7 +647,6 @@ class AHASHandler {
     }
     func download(code: String) -> Int {
         birdStorage = loadData(code: code)
-        print(loadData(code: code))
         if birdStorage.count == 0 {
             return 2
         }
