@@ -34,13 +34,19 @@ struct Notices: View {
                     .cornerRadius(10)
                     .font(.largeTitle)
             }
-            ScrollView {
-                VStack{
-                    ForEach(NOTAMData.getNOTAMS(code: getActive()), id: \.self.id) { notice in
-                        Text(notice.Title!).bold() + Text(notice.Alert!)
-                        Divider()
-                    }
-                }.padding(15)
+            if NOTAMData.getNOTAMS(code: getActive()).count >= 1 {
+                ScrollView {
+                    VStack{
+                        ForEach(NOTAMData.getNOTAMS(code: getActive()), id: \.self.id) { notice in
+                            Text(notice.Title!).bold() + Text(notice.Alert!)
+                            Divider()
+                        }
+                    }.padding(15)
+                }
+            }else {
+                Spacer()
+                Text("NOTAMs could not be loaded for selected airport")
+                Spacer()
             }
         }
     }

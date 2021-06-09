@@ -226,11 +226,12 @@ struct downloadingData: View {
     
     //Function that Loads All Data
     func downloadAllData() {
+        let code = getActive()
         lastDownloaded = Date()
-        metarDownload = METARData.download()
-        tafDownload = TAFData.download()
-        notamDownload = NOTAMData.download(code: getActive())
-        ahasDownload = AHASData.download(code: getActive())
+        metarDownload = METARData.download(code: code)
+        tafDownload = TAFData.download(code: code)
+        notamDownload = NOTAMData.download(code: code)
+        ahasDownload = AHASData.download(code: code)
     }
     
     func checkDownloadCompletion() {
@@ -331,11 +332,17 @@ class METARHandler {
     //Storage For METARs
     var METARs:[String] = []
     
-    
+    //Basically allows us to check if we have internet
+    func isLoaded() -> Bool {
+        if download(code: "KSPS") == 2 && getSpecificMETAR(code: "KSPS") == "No METAR Available For The Given Airport" {
+            return true
+        }
+        return false
+    }
     
     /* Download Function */
     //Returns 1 if Downloaded Successfully, 2 if Failed. (0 is default state, loading animation)
-    func download() -> Int {
+    func download(code: String) -> Int {
         //Storage for the raw downloaded content
         var contents:String
         //get the file (csv) from the api
@@ -358,7 +365,11 @@ class METARHandler {
         }
         METARs = Temp
         //successfully loaded data
-        return 1
+        if getSpecificMETAR(code: code) != "No METAR Available For The Given Airport" {
+            return 1
+        } else {
+            return 2
+        }
     }
     
     
@@ -416,7 +427,8 @@ class TAFHandler {
     
     /* Download Function */
     //Returns 1 if Downloaded Successfully, 2 if Failed. (0 is default state, loading animation)
-    func download() -> Int {
+    func download(code: String) -> Int {
+        
         //Storage for the raw downloaded content
         var contents:String
         //get the file (csv) from the api
@@ -439,7 +451,11 @@ class TAFHandler {
         }
         TAFs = lines
         //successfully loaded data
-        return 1
+        if getSpecificTAF(code: code) != "No TAF Available For The Given Airport" {
+            return 1
+        } else {
+            return 2
+        }
     }
     
     
@@ -477,7 +493,7 @@ class TAFHandler {
             if counter > 5 {
                 let checkCode = array[1]
                 if (code == checkCode) {
-                    return (Double(array[3]) ?? 0.0, Double(array[4]) ?? 0.0)
+                    return (Double(array[7]) ?? 0.0, Double(array[8]) ?? 0.0)
                 }
             }
         }
@@ -505,8 +521,8 @@ class NOTAMHandler {
     func download(code: String) -> Int {
         if let url = URL(string: "https://www.notams.faa.gov/dinsQueryWeb/queryRetrievalMapAction.do?reportType=Report&retrieveLocId=\(code)&actionType=notamRetrievalByICAOs&submit=View+NOTAMs") {
             do {
-                let contents = try String(contentsOf: url)
-                var rawNOTAMs = contents.components(separatedBy:"PRE")
+                let contents = try String(contentsOf: url, encoding: String.Encoding.ascii)
+                var rawNOTAMs = contents.components(separatedBy:"PRE>")
                 rawNOTAMs.remove(at: 0)
                 var y = 0
                 var processedNOTAMs:[NOTAM] = []
@@ -516,8 +532,10 @@ class NOTAMHandler {
                         let end = x.index(x.endIndex, offsetBy: -3)
                         let cleanedNOTAMs = x[start...end]
                         let finalNOTAMs = cleanedNOTAMs.components(separatedBy:"</b>")
-                        let temp = NOTAM(Title: finalNOTAMs[0], Alert: finalNOTAMs[1])
-                        processedNOTAMs.append(temp)
+                        if finalNOTAMs.count > 1 {
+                            let temp = NOTAM(Title: finalNOTAMs[0], Alert: finalNOTAMs[1])
+                            processedNOTAMs.append(temp)
+                        }
                     }
                     y+=1
                 }

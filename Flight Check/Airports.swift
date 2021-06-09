@@ -310,7 +310,7 @@ struct AddAirport: View {
 
                 Button(action: {
                     //makes sure we can verify the icao code
-                    if (METARData.download() == 2) {
+                    if (METARData.isLoaded() == false) {
                         self.feedback.notificationOccurred(.error)
                         self.selectAlert = .noInternet
                         self.showAlert = true
@@ -386,14 +386,31 @@ struct AddAirport: View {
         newAirport.code = airportCode.uppercased()
         newAirport.dateAdded = Date()
         
-        let results = METARData.getLocation(code: airportCode.uppercased())
+        var results = METARData.getLocation(code: airportCode.uppercased())
         newAirport.lat = results.lat
         newAirport.lon = results.lon
         newAirport.favorite = false
         //if invalid airport (no location)
         if (newAirport.lat == 0.0 && newAirport.lon == 0.0) {
-            context.delete(newAirport)
-            return false
+            results = TAFData.getLocation(code: airportCode.uppercased())
+            newAirport.lat = results.lat
+            newAirport.lon = results.lon
+            newAirport.favorite = false
+            //if invalid airport (no location)
+            if (newAirport.lat == 0.0 && newAirport.lon == 0.0) {
+                
+                context.delete(newAirport)
+                return false
+            } else {
+                //save new airport and make it active.
+                for curr in airports {
+                    curr.active = false
+                }
+                newAirport.active = true
+                try? context.save()
+                return true
+                
+            }
         } else {
             //save new airport and make it active.
             for curr in airports {
