@@ -334,7 +334,7 @@ class METARHandler {
     
     //Basically allows us to check if we have internet
     func isLoaded() -> Bool {
-        if download(code: "KSPS") == 2 && getSpecificMETAR(code: "KSPS") == "No METAR Available For The Given Airport" {
+        if download(code: "KSPS") == 2 && getSpecificMETAR(code: "KSPS") == "No METAR Available For The Given Airport" || download(code: "KSPS") == 1{
             return true
         }
         return false
