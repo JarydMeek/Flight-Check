@@ -41,6 +41,12 @@ struct ContentView: View {
         }
         return "No Selected Airport Currently"
     }
+    init() {
+        UITabBar.appearance().isTranslucent = true
+        if #available(iOS 15.0, *) {
+            UITabBar.appearance().backgroundColor = UIColor.secondarySystemBackground.withAlphaComponent(0.8)
+        }
+    }
     
     var body: some View {
         ZStack{
@@ -80,7 +86,7 @@ struct ContentView: View {
                     //Birds
                     Birds().tabItem {
                         VStack {
-                            Image("chick")
+                            Image("chick").foregroundColor(Color("lightDark"))
                             Text("AHAS Risk")
                         }
                     }
