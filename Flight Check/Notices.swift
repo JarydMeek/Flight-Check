@@ -38,7 +38,19 @@ struct Notices: View {
                 ScrollView {
                     VStack{
                         ForEach(NOTAMData.getNOTAMS(code: getActive()), id: \.self.id) { notice in
-                            Text(notice.Title!).bold() + Text(notice.Alert!)
+                            HStack{
+                                VStack(alignment: .leading){
+                                    HStack{
+                                        Text(notice.Title!).bold().font(.title2) + Text(notice.Alert!)
+                                    }
+                                    Spacer().frame(height:10)
+                                    Text(notice.Until!).bold()
+                                    Spacer().frame(height:10)
+                                    Text(notice.Created!).italic()
+                                    Spacer().frame(height:10)
+                                }
+                                Spacer()
+                            }
                             Divider()
                         }
                     }.padding(15)

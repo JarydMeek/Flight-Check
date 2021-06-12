@@ -39,6 +39,9 @@ struct ContentView: View {
                 return String(curr.code!)
             }
         }
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+            firstOpen = true
+        }
         return "No Selected Airport Currently"
     }
     init() {
@@ -54,8 +57,6 @@ struct ContentView: View {
                 Airports(showDownload: $downloadData)
                     .sheet(isPresented: $firstOpen) {
                     WelcomeScreen(showWarning: $firstOpen)
-                    }.onAppear{
-                        firstOpen = true
                     }
             } else { //If a user has an active airport, show the bottom bar so they can choose what data they want to view.
                 TabView(selection: $selection){
@@ -86,7 +87,7 @@ struct ContentView: View {
                     //Birds
                     Birds().tabItem {
                         VStack {
-                            Image("chick").foregroundColor(Color("lightDark"))
+                            Image("chick")
                             Text("AHAS Risk")
                         }
                     }
@@ -232,12 +233,15 @@ struct downloadingData: View {
     
     //Function that Loads All Data
     func downloadAllData() {
-        let code = getActive()
-        lastDownloaded = Date()
-        metarDownload = METARData.download(code: code)
-        tafDownload = TAFData.download(code: code)
-        notamDownload = NOTAMData.download(code: code)
-        ahasDownload = AHASData.download(code: code)
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+            let code = getActive()
+            lastDownloaded = Date()
+            //eventually add multi-threading here?
+            metarDownload = METARData.download(code: code)
+            tafDownload = TAFData.download(code: code)
+            notamDownload = NOTAMData.download(code: code)
+            ahasDownload = AHASData.download(code: code)
+        }
     }
     
     func checkDownloadCompletion() {
@@ -332,6 +336,15 @@ struct downloadingData: View {
 /* HANDLERS */
 /* -------- */
 //Handles the download and interpretation of data from the various APIs
+//OVERALL CHECK ICAO CODE FOR VALIDITY
+func isValidCode(code: String) -> Bool {
+    if (METARData.download(code: code) == 1 || TAFData.download(code: code) == 1 || NOTAMData.download(code: code) == 1 || AHASData.download(code: code) == 1 ) {
+        return true
+    }
+    return false
+}
+
+
 
 /* METARs */
 class METARHandler {
@@ -513,13 +526,14 @@ class NOTAMHandler {
     struct NOTAM {
         let Title:String?
         let Alert:String?
+        let Until:String?
+        let Created: String?
         let id = UUID()
     }
     //Array to store all notams for an airport
     var NOTAMs:[NOTAM] = []
     
     func getNOTAMS(code: String) -> [NOTAM] {
-        
         return NOTAMs
     }
     
@@ -537,16 +551,35 @@ class NOTAMHandler {
                         let start = x.index(x.startIndex, offsetBy: 4)
                         let end = x.index(x.endIndex, offsetBy: -3)
                         let cleanedNOTAMs = x[start...end]
-                        let finalNOTAMs = cleanedNOTAMs.components(separatedBy:"</b>")
+                        let cleanerNOTAMS = cleanedNOTAMs.replacingOccurrences(of: "\n", with: "")
+                        let finalNOTAMs = cleanerNOTAMS.components(separatedBy:"</b>")
                         if finalNOTAMs.count > 1 {
-                            let temp = NOTAM(Title: finalNOTAMs[0], Alert: finalNOTAMs[1])
-                            processedNOTAMs.append(temp)
+                            var storage:[String?] = []
+                            storage.append(finalNOTAMs[0])
+                        
+                            if let range = finalNOTAMs[1].range(of:"UNTIL",  options: String.CompareOptions.backwards) {
+                                let start = finalNOTAMs[1].index(range.lowerBound, offsetBy: -18)
+                                if let range2 = finalNOTAMs[1].range(of:"CREATED",  options: String.CompareOptions.backwards) {
+                                    let end = finalNOTAMs[1].index(range2.lowerBound, offsetBy: -1)
+                                
+                                
+                                    storage.append(String(String(finalNOTAMs[1][...start]).dropLast()))
+                                    storage.append(String(String(finalNOTAMs[1][start...end]).dropLast()))
+                                    storage.append(String(String(finalNOTAMs[1][end...]).dropFirst()))
+                                    print(storage)
+                                    let temp = NOTAM(Title: storage[0], Alert: storage[1],Until: storage[2], Created: storage[3])
+                                    processedNOTAMs.append(temp)
+                                }
+                            }
                         }
                     }
                     y+=1
                 }
-                NOTAMs = processedNOTAMs
-                return 1
+                if processedNOTAMs.count > 0 {
+                    NOTAMs = processedNOTAMs
+                    return 1
+                }
+                return 2
             } catch {
                 return 2
             }

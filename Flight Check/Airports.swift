@@ -89,7 +89,7 @@ struct Airports: View {
                         .frame(minWidth: 0, maxWidth: .infinity, minHeight: 0, maxHeight: .infinity)
                         .edgesIgnoringSafeArea(.all)
                 }
-
+                
                 //Airport Name
                 VStack{
                     Spacer()
@@ -220,8 +220,9 @@ struct AirportEditor: View {
                 //show all airports
                 ForEach(airports){ airport in
                     Button(action: { //if airport is picked, make active, download data, and dismiss view.
-                        showDownload = true
+                        
                         self.presentationMode.wrappedValue.dismiss()
+                        showDownload = true
                         self.makeActive(airport)
                     }){
                         airportRow(airport: airport)
@@ -232,8 +233,8 @@ struct AirportEditor: View {
             .navigationBarTitle("Select Airport")
             .navigationBarItems(trailing:
                                     NavigationLink(destination: AddAirport(loadData: $showDownload)){
-                                        Image(systemName: "plus")
-                                    }
+                Image(systemName: "plus")
+            }
             )
         }
     }
@@ -248,7 +249,6 @@ struct AirportEditor: View {
     }
     //make the selected airport active
     func makeActive(_ airport: Airport){
-        showDownload = true
         for curr in airports { //makes all the other airports not active
             curr.active = false
         }
@@ -307,100 +307,108 @@ struct AddAirport: View {
                 //add airport button.
                 HStack {
                     Spacer().frame(maxWidth: 100)
-
-                Button(action: {
-                    //makes sure we can verify the icao code
-                    if (METARData.isLoaded() == false) {
-                        self.feedback.notificationOccurred(.error)
-                        self.selectAlert = .noInternet
-                        self.showAlert = true
-                        //makes sure length is 4
-                    } else if (self.airportCode.count == 4) {
-                        //checks for duplicate
-                        var duplicate = false
-                        for curr in self.airports {
-                            if (curr.code == self.airportCode.uppercased()) {
-                                duplicate = true
-                            }
-                        }
-                        if (duplicate) {
+                    
+                    Button(action: {
+                        //makes sure we can verify the icao code
+                        if (METARData.isLoaded() == false) {
                             self.feedback.notificationOccurred(.error)
-                            self.selectAlert = .duplicate
+                            self.selectAlert = .noInternet
                             self.showAlert = true
-                        } else {
-                            //otherwise try to add
-                            let resultOfAdd = self.addAirport()
-                            
-                            if (resultOfAdd) {
-                                
-                                self.presentationMode.wrappedValue.dismiss()
-                                loadData = true
-                            } else {
-                                //invalid code err
-                                self.feedback.notificationOccurred(.error)
-                                self.selectAlert = .invalidCode
-                                self.showAlert = true
+                            //makes sure length is 4
+                        } else if (self.airportCode.count == 4) {
+                            //checks for duplicate
+                            var duplicate = false
+                            for curr in self.airports {
+                                if (curr.code == self.airportCode.uppercased()) {
+                                    duplicate = true
+                                }
                             }
-                            
+                            if (duplicate) {
+                                self.feedback.notificationOccurred(.error)
+                                self.selectAlert = .duplicate
+                                self.showAlert = true
+                            } else {
+                                //otherwise try to add
+                                let resultOfAdd = self.addAirport()
+                                
+                                if (resultOfAdd) {
+                                    
+                                    self.presentationMode.wrappedValue.dismiss()
+                                    loadData = true
+                                } else {
+                                    //invalid code err
+                                    self.feedback.notificationOccurred(.error)
+                                    self.selectAlert = .invalidCode
+                                    self.showAlert = true
+                                }
+                                
+                                
+                            }
+                        } else {
+                            self.selectAlert = .wrongLength
+                            self.showAlert = true
                             
                         }
-                    } else {
-                        self.selectAlert = .wrongLength
-                        self.showAlert = true
+                    }){
+                        Text("Add Airport")
+                    }.alert(isPresented: $showAlert) {
+                        
+                        //alerts
+                        switch selectAlert{
+                        case .wrongLength:
+                            return Alert(title: Text("Error Adding Airport"), message: Text("Please Enter A 4 Digit Airport Identifier"), dismissButton: .default(Text("Got it!")))
+                        case .duplicate:
+                            return Alert(title: Text("Error Adding Airport"), message: Text("Airport Already Added"), dismissButton: .default(Text("Got it!")))
+                        case .invalidCode:
+                            return Alert(title: Text("Error Adding Airport"), message: Text("Invalid Airport Code"), dismissButton: .default(Text("Got it!")))
+                        case .noInternet:
+                            return Alert(title: Text("Error Adding Airport"), message: Text("Couldn't Load Airports. Check Your Internet Connection"), dismissButton: .default(Text("Got it!")))
+                        }
                         
                     }
-                }){
-                    Text("Add Airport")
-                }.alert(isPresented: $showAlert) {
-                    
-                    //alerts
-                    switch selectAlert{
-                    case .wrongLength:
-                        return Alert(title: Text("Error Adding Airport"), message: Text("Please Enter A 4 Digit Airport Identifier"), dismissButton: .default(Text("Got it!")))
-                    case .duplicate:
-                        return Alert(title: Text("Error Adding Airport"), message: Text("Airport Already Added"), dismissButton: .default(Text("Got it!")))
-                    case .invalidCode:
-                        return Alert(title: Text("Error Adding Airport"), message: Text("Invalid Airport Code"), dismissButton: .default(Text("Got it!")))
-                    case .noInternet:
-                        return Alert(title: Text("Error Adding Airport"), message: Text("Couldn't Load Airports. Check Your Internet Connection"), dismissButton: .default(Text("Got it!")))
-                    }
-                    
+                    .frame(minWidth: 250)
+                    Spacer().frame(maxWidth: 100)
                 }
-                .frame(minWidth: 250)
-            Spacer().frame(maxWidth: 100)
-        }
-        .frame(height: 50)
-        .background(Color.accentColor)
-        .cornerRadius(15)
-        .padding(10)
-        .foregroundColor(Color("darkLight"))
+                .frame(height: 50)
+                .background(Color.accentColor)
+                .cornerRadius(15)
+                .padding(10)
+                .foregroundColor(Color("darkLight"))
                 Spacer()
             }
         }.navigationViewStyle(StackNavigationViewStyle())
-        .navigationBarTitle("Add A New Airport")
+            .navigationBarTitle("Add A New Airport")
     }
     func addAirport() -> Bool {
         //create new airport object and add neccesary information.
-        let newAirport = Airport(context: context)
-        newAirport.id = UUID()
-        newAirport.code = airportCode.uppercased()
-        newAirport.dateAdded = Date()
-        
-        var results = METARData.getLocation(code: airportCode.uppercased())
-        newAirport.lat = results.lat
-        newAirport.lon = results.lon
-        newAirport.favorite = false
-        //if invalid airport (no location)
-        if (newAirport.lat == 0.0 && newAirport.lon == 0.0) {
-            results = TAFData.getLocation(code: airportCode.uppercased())
+        if isValidCode(code: airportCode.uppercased()) {
+            let newAirport = Airport(context: context)
+            newAirport.id = UUID()
+            newAirport.code = airportCode.uppercased()
+            newAirport.dateAdded = Date()
+            var results = METARData.getLocation(code: airportCode.uppercased())
             newAirport.lat = results.lat
             newAirport.lon = results.lon
             newAirport.favorite = false
             //if invalid airport (no location)
             if (newAirport.lat == 0.0 && newAirport.lon == 0.0) {
-                
-                context.delete(newAirport)
-                return false
+                results = TAFData.getLocation(code: airportCode.uppercased())
+                newAirport.lat = results.lat
+                newAirport.lon = results.lon
+                newAirport.favorite = false
+                if (newAirport.lat == 0.0 && newAirport.lon == 0.0) {
+                    context.delete(newAirport)
+                    return false
+                } else {
+                    //save new airport and make it active.
+                    for curr in airports {
+                        curr.active = false
+                    }
+                    newAirport.active = true
+                    try? context.save()
+                    return true
+                    
+                }
             } else {
                 //save new airport and make it active.
                 for curr in airports {
@@ -412,15 +420,7 @@ struct AddAirport: View {
                 
             }
         } else {
-            //save new airport and make it active.
-            for curr in airports {
-                curr.active = false
-            }
-            newAirport.active = true
-            try? context.save()
-            return true
-            
+            return false
         }
     }
-    
 }
