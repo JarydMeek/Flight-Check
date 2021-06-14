@@ -566,7 +566,6 @@ class NOTAMHandler {
                                     storage.append(String(String(finalNOTAMs[1][...start]).dropLast()))
                                     storage.append(String(String(finalNOTAMs[1][start...end]).dropLast()))
                                     storage.append(String(String(finalNOTAMs[1][end...]).dropFirst()))
-                                    print(storage)
                                     let temp = NOTAM(Title: storage[0], Alert: storage[1],Until: storage[2], Created: storage[3])
                                     processedNOTAMs.append(temp)
                                 }
